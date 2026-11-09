@@ -1,0 +1,331 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("PRISMA_DATABASE_URL")
+  directUrl = env("PRISMA_DATABASE_URL_UNPOOLED")
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────────
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING // created, waiting for online payment
+  CONFIRMED // paid (online) or accepted (COD)
+  PROCESSING // being packed
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  COD
+  ONLINE
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum CouponType {
+  PERCENTAGE
+  FLAT
+}
+
+enum CodePurpose {
+  SIGNUP
+  CHECKOUT
+  RESET
+}
+
+// ─── Customers ──────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  phone         String?
+  password      String? // bcrypt hash. Null for guest-checkout accounts until they set one.
+  role          Role      @default(CUSTOMER)
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  addresses Address[]
+  orders    Order[]
+  wishlist  WishlistItem[]
+  reviews   Review[]
+
+  @@index([role])
+  @@map("users")
+}
+
+model Address {
+  id        String  @id @default(cuid())
+  userId    String
+  name      String
+  phone     String
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  pincode   String
+  isDefault Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+// One-time email codes for sign-up, guest checkout and password reset.
+model VerificationCode {
+  id        String      @id @default(cuid())
+  email     String
+  purpose   CodePurpose
+  codeHash  String
+  data      Json? // pending sign-up details (name, phone, password hash)
+  attempts  Int         @default(0)
+  expiresAt DateTime
+  createdAt DateTime    @default(now())
+
+  @@index([email, purpose])
+  @@map("verification_codes")
+}
+
+// ─── Catalogue ──────────────────────────────────────────────────────────
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String?
+  image       String?
+  sortOrder   Int     @default(100)
+  isActive    Boolean @default(true)
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  categoryId       String
+  price            Int // selling price, rupees
+  originalPrice    Int? // MRP, rupees
+  shortDescription String?
+  description      String?  @db.Text
+  images           String[]
+  features         String[]
+  tags             String[] // free tags used for search / "under999" etc.
+  material         String?
+  dimensions       String?
+  careInstructions String?
+  isNew            Boolean  @default(false)
+  isBestSeller     Boolean  @default(false)
+  isFeatured       Boolean  @default(false)
+  isActive         Boolean  @default(true)
+  rating           Float    @default(0)
+  reviewCount      Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  category   Category         @relation(fields: [categoryId], references: [id])
+  variants   ProductVariant[]
+  wishlisted WishlistItem[]
+  reviews    Review[]
+  orderItems OrderItem[]
+
+  @@index([categoryId])
+  @@index([isActive, createdAt])
+  @@map("products")
+}
+
+// A colour of a product with its own stock.
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  name      String // "Dusty Rose"
+  hex       String  @default("#222222")
+  stock     Int     @default(0)
+  sortOrder Int     @default(0)
+
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model WishlistItem {
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([userId, productId])
+  @@map("wishlist_items")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  rating    Int
+  title     String?
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("reviews")
+}
+
+// ─── Orders & payments ──────────────────────────────────────────────────
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique // CB-26-00001
+  userId          String
+  status          OrderStatus   @default(PENDING)
+  subtotal        Int // at selling price
+  mrpTotal        Int // at MRP
+  discount        Int           @default(0) // coupon discount
+  shipping        Int           @default(0)
+  total           Int
+  couponCode      String?
+  paymentMethod   PaymentMethod
+  paymentStatus   PaymentStatus @default(UNPAID)
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress Json
+  trackingUrl     String?
+  courier         String?
+  notes           String? // system notes, e.g. "paid after last piece sold - refund needed"
+  stockDeducted   Boolean       @default(false)
+  needsAttention  Boolean       @default(false)
+  razorpayOrderId String?       @unique
+  razorpayPaymentId String?
+  paidAt          DateTime?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id])
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status, createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String?
+  variantId   String?
+  name        String
+  variantName String?
+  image       String?
+  quantity    Int
+  price       Int // unit price charged
+  mrp         Int // unit MRP
+
+  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model OrderCounter {
+  year Int @id
+  seq  Int @default(0)
+
+  @@map("order_counters")
+}
+
+model Coupon {
+  id            String     @id @default(cuid())
+  code          String     @unique
+  description   String?
+  type          CouponType
+  value         Int // percent or flat rupees
+  maxDiscount   Int? // cap for percentage coupons
+  minOrder      Int        @default(0)
+  usageLimit    Int? // total uses
+  usedCount     Int        @default(0)
+  oncePerUser   Boolean    @default(true)
+  isActive      Boolean    @default(true)
+  expiresAt     DateTime?
+  createdAt     DateTime   @default(now())
+
+  redemptions CouponRedemption[]
+
+  @@map("coupons")
+}
+
+model CouponRedemption {
+  id        String   @id @default(cuid())
+  couponId  String
+  userId    String
+  orderId   String
+  createdAt DateTime @default(now())
+
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  @@index([couponId, userId])
+  @@map("coupon_redemptions")
+}
+
+// ─── Misc ───────────────────────────────────────────────────────────────
+
+model Setting {
+  key   String @id
+  value String
+
+  @@map("settings")
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("subscribers")
+}

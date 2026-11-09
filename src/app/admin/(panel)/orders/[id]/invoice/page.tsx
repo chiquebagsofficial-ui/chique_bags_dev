@@ -1,0 +1,14 @@
+import { notFound } from "next/navigation";
+import Invoice from "@/components/store/Invoice";
+import { prisma } from "@/lib/db";
+import { getSettings } from "@/lib/settings";
+
+export const metadata = { title: "Invoice" };
+export const dynamic = "force-dynamic";
+
+export default async function AdminInvoice({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const [order, settings] = await Promise.all([prisma.order.findUnique({ where: { id }, include: { items: true } }), getSettings()]);
+  if (!order) notFound();
+  return <Invoice order={order} settings={settings} />;
+}
