@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Banknote, CheckCircle2, CreditCard, Lock } from "lucide-react";
+import { Banknote, CheckCircle2, CreditCard, Gift, Lock } from "lucide-react";
 import { useCart, useToast } from "@/components/providers";
 import CouponBox from "@/components/store/CouponBox";
 import PriceSummary from "@/components/store/PriceSummary";
@@ -36,11 +36,12 @@ interface Props {
   addresses: Addr[];
   codEnabled: boolean;
   codFee: number;
+  gift: { enabled: boolean; fee: number; image: string };
   onlineAvailable: boolean;
   simulated: boolean;
 }
 
-export default function CheckoutClient({ user, addresses, codEnabled, codFee, onlineAvailable, simulated }: Props) {
+export default function CheckoutClient({ user, addresses, codEnabled, codFee, gift, onlineAvailable, simulated }: Props) {
   const cart = useCart();
   const toast = useToast();
   const router = useRouter();
@@ -50,11 +51,13 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, on
   const [selected, setSelected] = useState<string | "new">(addresses[0]?.id ?? "new");
   const [form, setForm] = useState<Addr>({ ...EMPTY, name: user?.name ?? "", phone: user?.phone ?? "" });
   const [saveAddress, setSaveAddress] = useState(true);
+  const [giftBox, setGiftBox] = useState(false);
+  const [giftNote, setGiftNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [testPay, setTestPay] = useState<{ orderId: string } | null>(null);
 
-  const { data, error } = usePricing(cart.items, coupon, method, cart.ready);
+  const { data, error } = usePricing(cart.items, coupon, method, cart.ready, giftBox);
 
   // Guest verification state
   const [gName, setGName] = useState("");
@@ -105,6 +108,8 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, on
       method,
       couponCode: data?.couponCode ?? null,
       expectedTotal: data?.total,
+      giftBox,
+      giftNote: giftBox ? giftNote : null,
     });
 
     if (!res.ok) {
@@ -250,9 +255,31 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, on
             )}
           </section>
 
-          {/* 3. Payment */}
+          {/* 3. Gift options */}
+          {gift.enabled && (
+            <section className={cn("card p-6 transition", !user && "pointer-events-none opacity-50")}>
+              <h2 className="mb-4 flex items-center gap-3 font-serif text-xl font-semibold"><span className="grid h-7 w-7 place-items-center rounded-full bg-ink text-sm text-white">3</span> Gift options</h2>
+              <label className={cn("flex cursor-pointer items-start gap-4 rounded-xl border-[1.5px] p-4", giftBox ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
+                <input type="checkbox" className="mt-1 h-4 w-4 accent-[#1a1a1a]" checked={giftBox} onChange={(e) => setGiftBox(e.target.checked)} />
+                {gift.image && <span className="relative hidden h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-white sm:block"><Image src={gift.image} alt="" fill sizes="80px" className="object-cover" /></span>}
+                <span className="text-sm">
+                  <span className="flex items-center gap-2 font-semibold"><Gift size={17} /> Add a gift box {gift.fee > 0 ? `for ${formatINR(gift.fee)}` : "(free)"}</span>
+                  <span className="text-muted">Your bag arrives in our signature gift box with tissue and ribbon, with a handwritten note card from you.</span>
+                </span>
+              </label>
+              {giftBox && (
+                <div className="mt-4">
+                  <label className="label" htmlFor="gift-note">Your message (optional, we'll write it on the card)</label>
+                  <textarea id="gift-note" className="input min-h-24" maxLength={200} placeholder="Happy birthday! Wishing you the best year yet." value={giftNote} onChange={(e) => setGiftNote(e.target.value)} />
+                  <p className="mt-1 text-right text-xs text-muted">{giftNote.length}/200</p>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* 4. Payment */}
           <section className={cn("card p-6 transition", !user && "pointer-events-none opacity-50")}>
-            <h2 className="mb-4 flex items-center gap-3 font-serif text-xl font-semibold"><span className="grid h-7 w-7 place-items-center rounded-full bg-ink text-sm text-white">3</span> Payment</h2>
+            <h2 className="mb-4 flex items-center gap-3 font-serif text-xl font-semibold"><span className="grid h-7 w-7 place-items-center rounded-full bg-ink text-sm text-white">{gift.enabled ? 4 : 3}</span> Payment</h2>
             <div className="space-y-3">
               {onlineAvailable && (
                 <label className={cn("flex cursor-pointer items-start gap-3 rounded-xl border-[1.5px] p-4", method === "ONLINE" ? "border-ink bg-cream" : "border-[#e7e0dc]")}>

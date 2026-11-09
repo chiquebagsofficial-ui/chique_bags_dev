@@ -1,0 +1,14 @@
+{
+  "name": "chique-bags-renders",
+  "private": true,
+  "type": "module",
+  "description": "Renders studio-style product images of the bags and gift box (three.js in headless Chrome), then uploads them to Cloudinary.",
+  "scripts": {
+    "render": "node render.mjs",
+    "upload": "node upload.mjs"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.0.0",
+    "three": "^0.170.0"
+  }
+}

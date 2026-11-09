@@ -13,3 +13,5 @@ npm-debug.log*
 .vercel
 /.local-db/
 /scratch/
+/tools/render/node_modules/
+/tools/render/out/

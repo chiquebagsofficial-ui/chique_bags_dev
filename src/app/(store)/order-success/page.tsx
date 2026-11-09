@@ -41,6 +41,7 @@ export default async function OrderSuccessPage({ searchParams }: { searchParams:
             </li>
           ))}
         </ul>
+        {order.giftBox && <p className="border-t border-line py-3 text-sm text-muted">Gift box included{order.giftNote ? <> · note: <em>“{order.giftNote}”</em></> : null}</p>}
         <div className="flex justify-between border-t border-line pt-4 text-lg font-semibold">
           <span>{cod ? "To pay on delivery" : "Paid"}</span><span>{formatINR(order.total)}</span>
         </div>

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Gift } from "lucide-react";
 import type { Metadata } from "next";
 import { CancelOrderButton } from "@/components/store/AccountForms";
 import StatusBadge, { OrderProgress } from "@/components/store/StatusBadge";
@@ -61,6 +62,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <div className="flex justify-between"><span className="text-muted">Subtotal</span><span>{formatINR(order.subtotal)}</span></div>
             {order.discount > 0 && <div className="flex justify-between"><span className="text-muted">Coupon {order.couponCode}</span><span className="text-berry">−{formatINR(order.discount)}</span></div>}
             <div className="flex justify-between"><span className="text-muted">Shipping</span><span>{order.shipping ? formatINR(order.shipping) : "Free"}</span></div>
+            {order.giftBox && <div className="flex justify-between"><span className="text-muted">Gift box &amp; note</span><span>{order.giftFee ? formatINR(order.giftFee) : "Free"}</span></div>}
             <div className="flex justify-between border-t border-line pt-3 text-base font-semibold"><span>Total</span><span>{formatINR(order.total)}</span></div>
             <p className="pt-1 text-xs text-muted">{order.paymentMethod === "COD" ? (paid ? "Cash on delivery · paid" : "Cash on delivery · pay on arrival") : paid ? "Paid online" : order.paymentStatus === "REFUNDED" ? "Refunded" : "Awaiting payment"}</p>
           </section>
@@ -68,6 +70,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <h3 className="mb-2 font-serif text-lg font-semibold">Delivering to</h3>
             <p className="leading-relaxed text-muted">{a.name}<br />{a.line1}{a.line2 && `, ${a.line2}`}<br />{a.city}, {a.state} {a.pincode}<br />{a.phone}</p>
           </section>
+          {order.giftBox && (
+            <section className="card p-6 text-sm">
+              <h3 className="mb-2 flex items-center gap-2 font-serif text-lg font-semibold"><Gift size={17} className="text-rose" /> Gift box</h3>
+              <p className="text-muted">{order.giftNote ? <>Your note: <em>“{order.giftNote}”</em></> : "Packed in our gift box."}</p>
+            </section>
+          )}
           <div className="flex flex-wrap items-start gap-3">
             {paid || order.paymentMethod === "COD" ? <Link href={`/account/orders/${order.id}/invoice`} target="_blank" className="btn btn-line btn-sm">Invoice</Link> : null}
             {canCancel && <CancelOrderButton orderId={order.id} />}

@@ -39,6 +39,12 @@ export default function SettingsForm({ initial }: { initial: Settings }) {
         <div><label className="label" htmlFor="s-cod">Cash on delivery fee (₹)</label><input id="s-cod" type="number" min={0} className="input" value={s.codFee} onChange={numf("codFee")} /></div>
       </section>
       <section className={sec}>
+        <h2 className="font-serif text-lg font-semibold sm:col-span-2">Gift box</h2>
+        <label className="flex items-center gap-3 self-end pb-3 text-sm"><input type="checkbox" checked={s.giftBoxEnabled} onChange={(e) => setS({ ...s, giftBoxEnabled: e.target.checked })} className="h-4 w-4 accent-[#1a1a1a]" /> Let customers add a gift box and note</label>
+        <div><label className="label" htmlFor="s-gift">Gift box price (₹, 0 = free)</label><input id="s-gift" type="number" min={0} className="input" value={s.giftBoxFee} onChange={numf("giftBoxFee")} /></div>
+        <div className="sm:col-span-2"><label className="label" htmlFor="s-gimg">Gift box photo link</label><input id="s-gimg" className="input" placeholder="https://…" value={s.giftBoxImage} onChange={str("giftBoxImage")} /></div>
+      </section>
+      <section className={sec}>
         <h2 className="font-serif text-lg font-semibold sm:col-span-2">Contact details</h2>
         <div><label className="label" htmlFor="s-mail">Public email</label><input id="s-mail" type="email" required className="input" value={s.contactEmail} onChange={str("contactEmail")} /></div>
         <div><label className="label" htmlFor="s-owner">Email for order alerts &amp; messages</label><input id="s-owner" type="email" className="input" value={s.ownerEmail} onChange={str("ownerEmail")} /></div>

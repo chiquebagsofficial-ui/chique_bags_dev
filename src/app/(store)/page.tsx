@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Leaf, RotateCcw, Truck, Wallet } from "lucide-react";
 import { Instagram } from "@/components/icons";
+import GiftSection from "@/components/store/GiftSection";
+import HeroTriptych from "@/components/store/HeroTriptych";
 import ProductCard from "@/components/store/ProductCard";
 import { getCards, getNavCategories } from "@/lib/catalog";
 import { getSettings } from "@/lib/settings";
@@ -29,12 +31,12 @@ export default async function HomePage() {
   const [settings, categories, featured, bestsellers, arrivals, budget] = await Promise.all([
     getSettings(),
     getNavCategories(),
-    getCards({ isFeatured: true }, 1, { createdAt: "desc" }),
+    getCards({ isFeatured: true }, 3, { createdAt: "desc" }),
     getCards({ isBestSeller: true }, 4, { createdAt: "desc" }),
     getCards({}, 4, { createdAt: "desc" }),
     getCards({ price: { lte: 999 } }, 1, { price: "asc" }),
   ]);
-  const hero = featured[0] ?? arrivals[0];
+  const heroPicks = featured.length >= 3 ? featured : [...featured, ...bestsellers, ...arrivals].filter((p, i, a) => a.findIndex((x) => x.id === p.id) === i).slice(0, 3);
   const lookbook = [...bestsellers, ...arrivals].filter((p) => p.image).slice(0, 5);
   const budgetPick = budget[0];
 
@@ -42,7 +44,7 @@ export default async function HomePage() {
     <>
       {/* Hero */}
       <section className="bg-blush">
-        <div className="wrap grid items-center gap-10 py-12 lg:grid-cols-2 lg:gap-16 lg:py-20">
+        <div className="wrap grid items-center gap-8 py-10 sm:gap-10 sm:py-12 lg:grid-cols-2 lg:gap-16 lg:py-20">
           <div className="fade-up">
             <p className="eyebrow">New season collection</p>
             <h1 className="h-display mt-5 text-[2.7rem] sm:text-6xl lg:text-[4.4rem]">
@@ -55,7 +57,7 @@ export default async function HomePage() {
               <Link href="/shop" className="btn btn-dark">Shop the collection</Link>
               <Link href="/shop?max=999" className="btn btn-line">Under {formatINR(999)}</Link>
             </div>
-            <dl className="mt-12 grid max-w-md grid-cols-3 gap-6 border-t border-rose-soft/60 pt-6">
+            <dl className="mt-12 hidden max-w-md grid-cols-3 gap-6 border-t border-rose-soft/60 pt-6 sm:grid">
               {[
                 ["100%", "Vegan leather"],
                 [formatINR(settings.freeShippingThreshold), "Free shipping"],
@@ -69,20 +71,7 @@ export default async function HomePage() {
             </dl>
           </div>
 
-          {hero?.image && (
-            <div className="relative mx-auto w-full max-w-[520px]">
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-white shadow-[0_30px_70px_-30px_rgba(184,67,110,0.45)]">
-                <Image src={hero.image} alt={hero.name} fill priority sizes="(min-width:1024px) 520px, 90vw" className="object-cover" />
-              </div>
-              <Link href={`/products/${hero.slug}`} className="absolute -bottom-5 left-4 right-4 flex items-center justify-between gap-4 rounded-2xl bg-white px-5 py-4 shadow-xl sm:left-auto sm:-left-8 sm:right-auto sm:min-w-[300px]">
-                <span>
-                  <span className="block text-sm font-semibold">{hero.name}</span>
-                  <span className="text-xs text-muted">{hero.variants[0]?.name} · Vegan leather</span>
-                </span>
-                <span className="font-serif text-lg font-semibold">{formatINR(hero.price)}</span>
-              </Link>
-            </div>
-          )}
+          <div className="min-w-0"><HeroTriptych products={heroPicks} /></div>
         </div>
       </section>
 
@@ -137,6 +126,9 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Gifting */}
+      {settings.giftBoxEnabled && <GiftSection image={settings.giftBoxImage} fee={settings.giftBoxFee} />}
 
       {/* Under 999 spotlight */}
       <section className="wrap py-20">

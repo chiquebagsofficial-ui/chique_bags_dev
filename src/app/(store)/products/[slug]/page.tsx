@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { ChevronDown, RotateCcw, ShieldCheck, Star, Truck } from "lucide-react";
+import { ChevronDown, Gift, RotateCcw, ShieldCheck, Star, Truck } from "lucide-react";
 import ProductBuyBox from "@/components/store/ProductBuyBox";
 import ProductCard from "@/components/store/ProductCard";
 import ProductGallery from "@/components/store/ProductGallery";
@@ -86,9 +86,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-        <ProductGallery images={product.images} name={product.name} />
+        <div className="min-w-0"><ProductGallery images={product.images} name={product.name} /></div>
 
-        <div className="lg:sticky lg:top-28 lg:self-start">
+        <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
           <p className="eyebrow">{product.category.name}</p>
           <h1 className="h-display mt-2 text-3xl sm:text-4xl">{product.name}</h1>
           {product.reviewCount > 0 && (
@@ -115,6 +115,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <ul className="mt-8 grid gap-3 rounded-2xl bg-cream p-5 text-sm">
             <li className="flex items-center gap-3"><Truck size={18} className="text-rose" /> Delivered in 3–5 days · Free above {formatINR(settings.freeShippingThreshold)}</li>
             <li className="flex items-center gap-3"><RotateCcw size={18} className="text-rose" /> 7-day exchange for wrong or defective items</li>
+            {settings.giftBoxEnabled && <li className="flex items-center gap-3"><Gift size={18} className="text-rose" /> <span>Make it a gift: add a gift box &amp; note at checkout{settings.giftBoxFee > 0 ? ` (${formatINR(settings.giftBoxFee)})` : ""} · <Link href="/gifting" className="underline">Learn more</Link></span></li>}
             <li className="flex items-center gap-3"><ShieldCheck size={18} className="text-rose" /> Secure payment · UPI, cards, net banking{settings.codEnabled && ", COD"}</li>
           </ul>
 

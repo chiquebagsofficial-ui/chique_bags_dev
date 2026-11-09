@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Gift } from "lucide-react";
 import OrderControls from "@/components/admin/OrderControls";
 import StatusBadge from "@/components/store/StatusBadge";
 import { prisma } from "@/lib/db";
@@ -29,6 +29,13 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
 
       {order.needsAttention && order.notes && <p className="mb-6 flex items-start gap-2 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"><AlertTriangle size={18} className="mt-0.5 shrink-0" /> {order.notes}</p>}
 
+      {order.giftBox && (
+        <section className="mb-6 rounded-2xl border border-rose-soft bg-blush p-5 text-sm">
+          <p className="flex items-center gap-2 font-semibold text-berry"><Gift size={18} /> Pack this order in a gift box</p>
+          {order.giftNote ? <p className="mt-2 whitespace-pre-wrap text-base leading-relaxed">Note card: <em>“{order.giftNote}”</em></p> : <p className="mt-1 text-muted">No note was written.</p>}
+        </section>
+      )}
+
       <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="space-y-6">
           <section className="card p-6">
@@ -46,6 +53,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               <div className="flex justify-between"><dt className="text-muted">Subtotal</dt><dd>{formatINR(order.subtotal)}</dd></div>
               {order.discount > 0 && <div className="flex justify-between"><dt className="text-muted">Coupon {order.couponCode}</dt><dd>−{formatINR(order.discount)}</dd></div>}
               <div className="flex justify-between"><dt className="text-muted">Shipping</dt><dd>{order.shipping ? formatINR(order.shipping) : "Free"}</dd></div>
+              {order.giftBox && <div className="flex justify-between"><dt className="text-muted">Gift box &amp; note</dt><dd>{order.giftFee ? formatINR(order.giftFee) : "Free"}</dd></div>}
               <div className="flex justify-between text-base font-semibold"><dt>Total</dt><dd>{formatINR(order.total)}</dd></div>
             </dl>
           </section>

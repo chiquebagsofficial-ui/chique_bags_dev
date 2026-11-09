@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "orders" ADD COLUMN     "giftBox" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "giftFee" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "giftNote" TEXT;

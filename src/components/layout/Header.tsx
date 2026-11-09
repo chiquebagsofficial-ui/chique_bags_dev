@@ -70,6 +70,7 @@ export default function Header({ categories, announcement }: { categories: Cat[]
                 </div>
               )}
             </div>
+            <Link href="/gifting" className="nav-link" data-active={active("/gifting")}>Gifting</Link>
             <Link href="/about" className="nav-link" data-active={active("/about")}>About</Link>
             <Link href="/contact" className="nav-link" data-active={active("/contact")}>Contact</Link>
           </nav>
@@ -107,6 +108,7 @@ export default function Header({ categories, announcement }: { categories: Cat[]
               ["/shop", "Shop all"],
               ...categories.map((c) => [`/shop?category=${c.slug}`, c.name]),
               ["/shop?sort=popular", "Bestsellers"],
+              ["/gifting", "Gifting"],
               ["/wishlist", "Favourites"],
               ["/about", "About us"],
               ["/contact", "Contact"],

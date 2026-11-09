@@ -10,6 +10,7 @@ const schema = z.object({
   items: cartSchema,
   couponCode: z.string().trim().max(40).nullish(),
   method: z.enum(["COD", "ONLINE"]).optional(),
+  giftBox: z.boolean().optional(),
 });
 
 // Live price breakdown for the cart and checkout, always computed from the database.
@@ -17,7 +18,7 @@ export async function POST(req: Request) {
   const parsed = await parseBody(req, schema);
   if ("error" in parsed) return parsed.error;
   const user = await getSessionUser();
-  const result = await priceCart(parsed.data.items, { couponCode: parsed.data.couponCode, userId: user?.id, method: parsed.data.method });
+  const result = await priceCart(parsed.data.items, { couponCode: parsed.data.couponCode, userId: user?.id, method: parsed.data.method, giftBox: parsed.data.giftBox });
   if (!result.ok) return fail(result.error, 409, { code: result.code, variantId: result.variantId });
   return ok(result);
 }

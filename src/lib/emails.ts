@@ -36,7 +36,13 @@ function itemsTable(order: OrderWithItems): string {
 ${line("Subtotal", formatINR(order.subtotal))}
 ${order.discount ? line(`Coupon${order.couponCode ? ` (${e(order.couponCode)})` : ""}`, `−${formatINR(order.discount)}`) : ""}
 ${line("Shipping", order.shipping ? formatINR(order.shipping) : "Free")}
+${order.giftBox ? line("Gift box &amp; note", order.giftFee ? formatINR(order.giftFee) : "Free") : ""}
 ${line("Total", formatINR(order.total), true)}</table>`;
+}
+
+function giftBlock(order: Order): string {
+  if (!order.giftBox) return "";
+  return `<p style="font-size:14px;line-height:1.6;margin:0 0 14px;background:#fdf5f7;border-radius:10px;padding:12px 14px"><strong>Gift box included</strong>${order.giftNote ? `<br>Note card: <em>“${e(order.giftNote)}”</em>` : ""}</p>`;
 }
 
 function addressBlock(order: Order): string {
@@ -87,6 +93,7 @@ export async function sendOrderConfirmation(order: OrderWithItems) {
         itemsTable(order) +
         p("<strong>Delivering to</strong>") +
         addressBlock(order) +
+        giftBlock(order) +
         button(appUrl(`/account/orders/${order.id}`), "View your order") +
         p("We'll email you again as soon as your bag ships.")
     ),
@@ -145,6 +152,7 @@ export async function sendOwnerNewOrder(order: OrderWithItems) {
       }.`) +
         itemsTable(order) +
         addressBlock(order) +
+        giftBlock(order) +
         button(appUrl(`/admin/orders/${order.id}`), "Open in admin")
     ),
   });

@@ -35,6 +35,7 @@ export type PriceResult =
       discount: number;
       shipping: number;
       codFee: number;
+      giftFee: number;
       total: number;
       couponCode: string | null;
       couponError: string | null;
@@ -45,7 +46,7 @@ export type PriceResult =
 /** The server is the only source of truth for prices, discounts, shipping and stock. */
 export async function priceCart(
   items: CartLineInput[],
-  opts: { couponCode?: string | null; userId?: string | null; method?: "COD" | "ONLINE" } = {}
+  opts: { couponCode?: string | null; userId?: string | null; method?: "COD" | "ONLINE"; giftBox?: boolean } = {}
 ): Promise<PriceResult> {
   const merged = new Map<string, number>();
   for (const it of items) merged.set(it.variantId, (merged.get(it.variantId) ?? 0) + it.quantity);
@@ -104,7 +105,8 @@ export async function priceCart(
 
   const shipping = subtotal >= settings.freeShippingThreshold ? 0 : settings.shippingFee;
   const codFee = opts.method === "COD" ? settings.codFee : 0;
-  const total = Math.max(0, subtotal - discount + shipping + codFee);
+  const giftFee = opts.giftBox && settings.giftBoxEnabled ? settings.giftBoxFee : 0;
+  const total = Math.max(0, subtotal - discount + shipping + codFee + giftFee);
 
   return {
     ok: true,
@@ -114,6 +116,7 @@ export async function priceCart(
     discount,
     shipping,
     codFee,
+    giftFee,
     total,
     couponCode,
     couponError,
@@ -195,6 +198,8 @@ export interface CreateOrderInput {
   couponCode?: string | null;
   method: "COD" | "ONLINE";
   expectedTotal?: number;
+  giftBox?: boolean;
+  giftNote?: string | null;
 }
 
 export type CreateOrderResult =
@@ -218,7 +223,10 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
     return { ok: false, status: 503, error: "Online payment is not available right now. Please try again later." };
   }
 
-  const priced = await priceCart(input.items, { couponCode: input.couponCode, userId: input.userId, method: input.method });
+  if (input.giftBox && !settings.giftBoxEnabled) {
+    return { ok: false, status: 400, error: "Gift boxes aren't available right now." };
+  }
+  const priced = await priceCart(input.items, { couponCode: input.couponCode, userId: input.userId, method: input.method, giftBox: input.giftBox });
   if (!priced.ok) return { ok: false, status: 409, error: priced.error, code: priced.code };
   if (priced.couponError) return { ok: false, status: 400, error: priced.couponError, code: "COUPON" };
   if (input.expectedTotal !== undefined && input.expectedTotal !== priced.total) {
@@ -247,6 +255,9 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
         mrpTotal: priced.mrpTotal,
         discount: priced.discount,
         shipping: priced.shipping + priced.codFee,
+        giftBox: Boolean(input.giftBox),
+        giftFee: priced.giftFee,
+        giftNote: input.giftBox ? input.giftNote?.trim() || null : null,
         total: priced.total,
         couponCode: priced.couponCode,
         paymentMethod: input.method,

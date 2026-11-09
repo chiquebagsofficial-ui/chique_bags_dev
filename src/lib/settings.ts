@@ -7,6 +7,9 @@ export const DEFAULT_SETTINGS = {
   shippingFee: "79",
   codEnabled: "true",
   codFee: "0",
+  giftBoxEnabled: "true",
+  giftBoxFee: "149",
+  giftBoxImage: "",
   contactEmail: "hello@chiquebags.in",
   contactPhone: "",
   whatsapp: "",
@@ -22,6 +25,9 @@ export type Settings = {
   shippingFee: number;
   codEnabled: boolean;
   codFee: number;
+  giftBoxEnabled: boolean;
+  giftBoxFee: number;
+  giftBoxImage: string;
   contactEmail: string;
   contactPhone: string;
   whatsapp: string;
@@ -40,6 +46,9 @@ export const getSettings = cache(async (): Promise<Settings> => {
     shippingFee: Number(raw.shippingFee) || 0,
     codEnabled: raw.codEnabled === "true",
     codFee: Number(raw.codFee) || 0,
+    giftBoxEnabled: raw.giftBoxEnabled === "true",
+    giftBoxFee: Number(raw.giftBoxFee) || 0,
+    giftBoxImage: raw.giftBoxImage,
     contactEmail: raw.contactEmail,
     contactPhone: raw.contactPhone,
     whatsapp: raw.whatsapp,

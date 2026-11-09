@@ -47,6 +47,7 @@ export default function Invoice({ order, settings }: { order: Order & { items: O
         <div className="flex justify-between"><dt className="text-muted">Discount</dt><dd>−{formatINR(order.mrpTotal - order.subtotal)}</dd></div>
         {order.discount > 0 && <div className="flex justify-between"><dt className="text-muted">Coupon {order.couponCode}</dt><dd>−{formatINR(order.discount)}</dd></div>}
         <div className="flex justify-between"><dt className="text-muted">Shipping</dt><dd>{order.shipping ? formatINR(order.shipping) : "Free"}</dd></div>
+        {order.giftBox && <div className="flex justify-between"><dt className="text-muted">Gift box &amp; note</dt><dd>{order.giftFee ? formatINR(order.giftFee) : "Free"}</dd></div>}
         <div className="flex justify-between border-t border-ink pt-3 text-base font-bold"><dt>Total</dt><dd>{formatINR(order.total)}</dd></div>
         {saved > 0 && <p className="pt-1 text-right text-xs text-muted">You saved {formatINR(saved)} on this order</p>}
       </dl>

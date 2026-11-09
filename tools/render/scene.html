@@ -1,0 +1,452 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#fff}canvas{display:block}</style>
+<script type="importmap">
+{ "imports": { "three": "/node_modules/three/build/three.module.js", "three/addons/": "/node_modules/three/examples/jsm/" } }
+</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const GOLD = 0xd9b45a;
+
+// ───────────────────────── textures ─────────────────────────
+function rand(seed) { let s = seed; return () => ((s = (s * 16807) % 2147483647) / 2147483647); }
+
+function canvasTex(size, draw, srgb) {
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  draw(c.getContext("2d"), size);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.anisotropy = 8;
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+// Leather grain as a height map.
+function grainTexture() {
+  return canvasTex(512, (g, n) => {
+    const img = g.createImageData(n, n);
+    const r = rand(7);
+    // two octaves of blocky noise blurred by averaging
+    const base = new Float32Array(n * n);
+    for (let i = 0; i < base.length; i++) base[i] = r();
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+      let v = 0;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) v += base[((y + dy + n) % n) * n + ((x + dx + n) % n)];
+      v = v / 9;
+      const k = Math.max(0, Math.min(255, (v - 0.5) * 900 + 128));
+      const i = (y * n + x) * 4;
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = k; img.data[i + 3] = 255;
+    }
+    g.putImageData(img, 0, 0);
+  }, false);
+}
+
+// Diamond quilting: returns { color, bump } textures sharing one pattern.
+function quiltTextures(cells = 1) {
+  const draw = (asColor) => (g, n) => {
+    const img = g.createImageData(n, n);
+    const r = rand(11);
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+      const u = (x / n) * cells, v = (y / n) * cells;
+      const a = (u + v) % 1, b = (((u - v) % 1) + 1) % 1;
+      const puff = Math.pow(Math.sin(Math.PI * a) * Math.sin(Math.PI * b), 0.55);
+      const noise = (r() - 0.5) * 10;
+      let k;
+      if (asColor) k = 175 + puff * 80 + noise * 0.4;
+      else k = puff * 215 + 20 + noise;
+      k = Math.max(0, Math.min(255, k));
+      const i = (y * n + x) * 4;
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = k; img.data[i + 3] = 255;
+    }
+    g.putImageData(img, 0, 0);
+  };
+  return { color: canvasTex(512, draw(true), true), bump: canvasTex(512, draw(false), false) };
+}
+
+// Horizontal puffer channels.
+function channelTextures(count = 1) {
+  const draw = (asColor) => (g, n) => {
+    const img = g.createImageData(n, n);
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+      const v = (y / n) * count % 1;
+      const puff = Math.pow(Math.sin(Math.PI * v), 0.5);
+      const k = asColor ? 170 + puff * 85 : 15 + puff * 225;
+      const i = (y * n + x) * 4;
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = k; img.data[i + 3] = 255;
+    }
+    g.putImageData(img, 0, 0);
+  };
+  return { color: canvasTex(256, draw(true), true), bump: canvasTex(256, draw(false), false) };
+}
+
+const grain = grainTexture();
+function rep(tex, u, v) { const t = tex.clone(); t.needsUpdate = true; t.repeat.set(u, v); return t; }
+
+// ───────────────────────── materials ─────────────────────────
+function leather({ color, rough = 0.5, clear = 0.3, metal = 0, sheen = 0.12, grainRep = [6, 6], grainScale = 0.9, extra }) {
+  const m = new THREE.MeshPhysicalMaterial({
+    color, roughness: rough, metalness: metal, clearcoat: clear, clearcoatRoughness: 0.35,
+    sheen, sheenRoughness: 0.8, sheenColor: new THREE.Color(color).lerp(new THREE.Color(0xffffff), 0.5),
+    bumpMap: rep(grain, grainRep[0], grainRep[1]), bumpScale: grainScale,
+  });
+  if (extra) {
+    m.map = extra.color; m.bumpMap = extra.bump; m.bumpScale = extra.scale ?? 2.2;
+  }
+  return m;
+}
+const goldMat = () => new THREE.MeshStandardMaterial({ color: GOLD, metalness: 1, roughness: 0.22, envMapIntensity: 1.4 });
+
+// ───────────────────────── geometry helpers ─────────────────────────
+function mesh(geo, mat, parent, shadow = true) {
+  const m = new THREE.Mesh(geo, mat);
+  m.castShadow = shadow; m.receiveShadow = true;
+  parent.add(m);
+  return m;
+}
+
+function chainAlong(curve, group, pitch = 0.95) {
+  const total = curve.getLength();
+  const n = Math.floor(total / pitch);
+  const geo = new THREE.TorusGeometry(0.5, 0.15, 14, 28);
+  geo.scale(1.35, 1, 1);
+  const inst = new THREE.InstancedMesh(geo, goldMat(), n);
+  inst.castShadow = true;
+  const m = new THREE.Matrix4(), up = new THREE.Vector3(0, 1, 0);
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    const p = curve.getPointAt(t), T = curve.getTangentAt(t).normalize();
+    let B = new THREE.Vector3().crossVectors(T, up);
+    if (B.lengthSq() < 1e-6) B.set(0, 0, 1);
+    B.normalize();
+    const N = new THREE.Vector3().crossVectors(B, T).normalize();
+    const flip = i % 2 === 0;
+    const y = flip ? N : B, z = flip ? B : N;
+    m.makeBasis(T, y, z).setPosition(p);
+    inst.setMatrixAt(i, m);
+  }
+  group.add(inst);
+}
+
+function ribbonAlong(curve, group, mat, width = 1.6, thick = 0.22, segs = 80) {
+  const up = new THREE.Vector3(0, 1, 0);
+  const pos = [], idx = [], uv = [];
+  for (let i = 0; i <= segs; i++) {
+    const t = i / segs, p = curve.getPointAt(t), T = curve.getTangentAt(t);
+    const B = new THREE.Vector3().crossVectors(T, up).normalize();
+    const N = new THREE.Vector3().crossVectors(B, T).normalize();
+    for (const s of [-1, 1]) for (const f of [-1, 1]) {
+      const q = p.clone().addScaledVector(B, s * width / 2).addScaledVector(N, f * thick / 2);
+      pos.push(q.x, q.y, q.z); uv.push(i / 8, s > 0 ? 1 : 0);
+    }
+  }
+  for (let i = 0; i < segs; i++) {
+    const a = i * 4, b = (i + 1) * 4;
+    // 4 corners per step: (-B,-N)=0 (-B,+N)=1 (+B,-N)=2 (+B,+N)=3
+    const quad = (p, q, r, s) => idx.push(p, q, r, q, s, r);
+    quad(a + 1, b + 1, a + 3, b + 3); // top face
+    quad(a + 2, b + 2, a + 0, b + 0); // bottom face
+    quad(a + 0, b + 0, a + 1, b + 1); // left edge
+    quad(a + 3, b + 3, a + 2, b + 2); // right edge
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx); g.computeVertexNormals();
+  const m = mesh(g, mat, group); m.material.side = THREE.DoubleSide;
+}
+
+function ring(parent, x, y, z, r = 0.85, tube = 0.2, rotY = 0) {
+  const t = mesh(new THREE.TorusGeometry(r, tube, 14, 32), goldMat(), parent);
+  t.position.set(x, y, z); t.rotation.y = rotY;
+  return t;
+}
+
+function strapCurve(w, h, depthBack, lift) {
+  return new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-w / 2, h - 0.6, 0),
+    new THREE.Vector3(-w * 0.46, h + lift * 0.45, -depthBack * 0.3),
+    new THREE.Vector3(-w * 0.34, h + lift * 0.85, -depthBack * 0.7),
+    new THREE.Vector3(0, h + lift, -depthBack),
+    new THREE.Vector3(w * 0.34, h + lift * 0.85, -depthBack * 0.7),
+    new THREE.Vector3(w * 0.46, h + lift * 0.45, -depthBack * 0.3),
+    new THREE.Vector3(w / 2, h - 0.6, 0),
+  ], false, "catmullrom", 0.5);
+}
+
+// ───────────────────────── bag builders ─────────────────────────
+function turnLock(parent, x, y, z) {
+  const g = new THREE.Group(); g.position.set(x, y, z); parent.add(g);
+  const disc = mesh(new THREE.CylinderGeometry(1.25, 1.25, 0.5, 40), goldMat(), g); disc.rotation.x = Math.PI / 2;
+  const rim = mesh(new THREE.TorusGeometry(1.25, 0.14, 12, 40), goldMat(), g); rim.position.z = 0.22;
+  const bar = mesh(new RoundedBoxGeometry(0.5, 1.7, 0.45, 4, 0.18), goldMat(), g); bar.position.z = 0.45;
+  return g;
+}
+
+function zipper(parent, w, y, z, pullDir = 1) {
+  const track = mesh(new RoundedBoxGeometry(w, 0.38, 0.5, 3, 0.12), goldMat(), parent);
+  track.position.set(0, y, z);
+  const slider = mesh(new RoundedBoxGeometry(1.2, 0.8, 0.7, 3, 0.2), goldMat(), parent);
+  slider.position.set(pullDir * (w / 2 - 2.2), y, z + 0.05);
+  const tab = mesh(new RoundedBoxGeometry(0.55, 2.2, 0.22, 3, 0.1), goldMat(), parent);
+  tab.position.set(pullDir * (w / 2 - 2.2), y - 1.3, z + 0.55);
+}
+
+function buildBag(cfg) {
+  const root = new THREE.Group();
+  const { w, h, d } = cfg;
+  const col = new THREE.Color(cfg.color);
+  const rough = cfg.rough ?? 0.5;
+
+  if (cfg.shape === "crescent") {
+    const R = cfg.r ?? 13;
+    const s = new THREE.Shape();
+    s.moveTo(-R, 0); s.lineTo(R, 0); s.absarc(0, 0, R, 0, -Math.PI, true);
+    const bv = d * 0.36;
+    const geo = new THREE.ExtrudeGeometry(s, { depth: d * 0.5, bevelEnabled: true, bevelThickness: bv, bevelSize: bv, bevelSegments: 14, curveSegments: 64 });
+    geo.translate(0, 0, -d * 0.25);
+    geo.computeVertexNormals();
+    const mat = leather({ color: col, rough, clear: cfg.clear ?? 0.4, grainRep: [0.22, 0.22], grainScale: 0.8 });
+    const body = mesh(geo, mat, root);
+    const top = R + bv * 2 + 0.05;
+    body.position.y = top;
+    // stitched piping that follows the curve, front and back
+    for (const side of [1, -1]) {
+      const pipe = mesh(new THREE.TorusGeometry(R * 0.86, 0.13, 8, 96, Math.PI), leather({ color: col.clone().multiplyScalar(0.8), rough: 0.6, clear: 0.1 }), root);
+      pipe.rotation.z = Math.PI; pipe.position.set(0, top - 0.2 - bv, side * (d * 0.25 + bv + 0.04));
+    }
+    const tab = mesh(new RoundedBoxGeometry(3.6, 1.3, 0.35, 4, 0.15), goldMat(), root);
+    tab.position.set(0, top - 2.2, d * 0.25 + bv + 0.2);
+    // zip along the flat top
+    const zw = R * 2 + bv * 2;
+    zipper(root, zw * 0.86, top + 0.15, 0, 1);
+    // strap
+    const sw = R * 2;
+    const curve = strapCurve(sw + 0.6, top, d * 3, cfg.lift ?? 17);
+    ring(root, -R - 0.3, top - 0.6, 0, 0.9, 0.2, Math.PI / 2); ring(root, R + 0.3, top - 0.6, 0, 0.9, 0.2, Math.PI / 2);
+    if (cfg.strap === "chain") chainAlong(curve, root);
+    else ribbonAlong(curve, root, leather({ color: col.clone().multiplyScalar(0.92), rough: 0.55, clear: 0.2 }), 1.7);
+    return { root, height: top + (cfg.lift ?? 17), focus: new THREE.Vector3(0, top * 0.55, 0), detail: new THREE.Vector3(R * 0.55, top + d * 0.4, d * 0.6) };
+  }
+
+  // box family
+  const r = cfg.radius ?? 1.4;
+  let extra = null, grainRep = [w / 5, h / 5];
+  if (cfg.quilt) {
+    const q = quiltTextures(1);
+    extra = { color: rep(q.color, cfg.quilt[0], cfg.quilt[1]), bump: rep(q.bump, cfg.quilt[0], cfg.quilt[1]), scale: cfg.quiltDepth ?? 2.6 };
+  } else if (cfg.channels) {
+    const q = channelTextures(1);
+    extra = { color: rep(q.color, 1, cfg.channels), bump: rep(q.bump, 1, cfg.channels), scale: cfg.quiltDepth ?? 3.2 };
+  }
+  const bodyMat = leather({ color: col, rough, clear: cfg.clear ?? 0.3, sheen: cfg.sheen ?? 0.12, metal: cfg.metal ?? 0, grainRep, extra });
+  const body = mesh(new RoundedBoxGeometry(w, h, d, 14, r), bodyMat, root);
+  body.position.y = h / 2;
+
+  if (cfg.flap) {
+    const fh = h * cfg.flap;
+    const fs = new THREE.Shape();
+    fs.moveTo(-w / 2 + 0.9, 0); fs.lineTo(w / 2 - 0.9, 0);
+    fs.lineTo(w / 2 - 0.9, -fh * 0.62);
+    fs.quadraticCurveTo(w / 2 - 0.9, -fh, w * 0.26, -fh);
+    fs.lineTo(-w * 0.26, -fh);
+    fs.quadraticCurveTo(-w / 2 + 0.9, -fh, -w / 2 + 0.9, -fh * 0.62);
+    fs.closePath();
+    const fgeo = new THREE.ExtrudeGeometry(fs, { depth: 0.45, bevelEnabled: true, bevelThickness: 0.35, bevelSize: 0.35, bevelSegments: 6, curveSegments: 24 });
+    let fmat;
+    if (cfg.quilt) {
+      const q = quiltTextures(1);
+      const ru = cfg.quilt[0] / w, rv = cfg.quilt[1] / h;
+      fmat = leather({ color: col, rough, clear: cfg.clear ?? 0.3, sheen: cfg.sheen ?? 0.12, metal: cfg.metal ?? 0, grainRep, extra: { color: rep(q.color, ru, rv), bump: rep(q.bump, ru, rv), scale: cfg.quiltDepth ?? 2.6 } });
+    } else fmat = bodyMat.clone();
+    const flap = mesh(fgeo, fmat, root);
+    flap.position.set(0, h - 0.05, d / 2 + 0.05);
+    flap.rotation.x = -0.035;
+    if (cfg.lock === "turn") turnLock(root, 0, h - fh + 1.6, d / 2 + 0.95);
+    if (cfg.lock === "bar") {
+      const bar = mesh(new RoundedBoxGeometry(3.2, 1.3, 0.5, 4, 0.2), goldMat(), root);
+      bar.position.set(0, h - fh + 1.2, d / 2 + 0.85);
+    }
+  }
+  if (cfg.zip) zipper(root, w * 0.9, h + 0.02, d * 0.02, 1);
+
+  if (cfg.pocket) {
+    const pk = mesh(new RoundedBoxGeometry(w * 0.78, h * 0.5, 0.9, 8, 0.4), body.material.clone(), root);
+    pk.position.set(0, h * 0.34, d / 2 + 0.25);
+    const stitch = mesh(new RoundedBoxGeometry(w * 0.7, 0.1, 0.05, 2, 0.02), goldMat(), root);
+    stitch.position.set(0, h * 0.58, d / 2 + 0.74);
+    if (cfg.pocketZip) { const zz = mesh(new RoundedBoxGeometry(w * 0.7, 0.3, 0.3, 3, 0.1), goldMat(), root); zz.position.set(0, h * 0.58, d / 2 + 0.78); }
+  }
+  if (cfg.buckle) {
+    const strapF = mesh(new RoundedBoxGeometry(2.4, h * 0.42, 0.35, 4, 0.12), body.material.clone(), root);
+    strapF.position.set(0, h * 0.66, d / 2 + 0.3);
+    const bk = mesh(new THREE.TorusGeometry(0.95, 0.16, 12, 28), goldMat(), root); bk.scale.set(1.2, 1, 1);
+    bk.position.set(0, h * 0.5, d / 2 + 0.55);
+  }
+
+  // strap
+  const attachY = h - 0.4;
+  ring(root, -w / 2 - 0.1, attachY, 0, 0.8, 0.2, Math.PI / 2); ring(root, w / 2 + 0.1, attachY, 0, 0.8, 0.2, Math.PI / 2);
+  const curve = strapCurve(w + 0.2, h, d * 3.4, cfg.lift ?? 18);
+  if (cfg.strap === "chain") chainAlong(curve, root);
+  else ribbonAlong(curve, root, leather({ color: col.clone().multiplyScalar(0.94), rough: 0.55, clear: 0.15 }), cfg.strapW ?? 1.9);
+  return { root, height: h + (cfg.lift ?? 18), focus: new THREE.Vector3(0, h * 0.5, 0), detail: new THREE.Vector3(0, h * (cfg.flap ? 1 - cfg.flap * 0.8 : 0.9), d / 2 + 0.6) };
+}
+
+// ───────────────────────── gift box ─────────────────────────
+function noteCardTexture(text) {
+  return canvasTex(512, (g, n) => {
+    g.fillStyle = "#fffdf9"; g.fillRect(0, 0, n, n);
+    g.strokeStyle = "#d9b45a"; g.lineWidth = 6; g.strokeRect(22, 22, n - 44, n - 44);
+    g.fillStyle = "#b8436e"; g.font = "italic 44px Georgia, serif"; g.textAlign = "center";
+    g.fillText("Chique Bags", n / 2, 100);
+    g.fillStyle = "#3b2f33"; g.font = "50px 'Segoe Script','Brush Script MT',cursive";
+    const lines = text.split("|");
+    lines.forEach((l, i) => g.fillText(l, n / 2, 220 + i * 72));
+    g.fillStyle = "#d8899f"; g.font = "44px serif"; g.fillText("♡", n / 2, n - 70);
+  }, true);
+}
+
+function buildGiftBox(cfg) {
+  const root = new THREE.Group();
+  const col = new THREE.Color(cfg.color ?? "#f2bac9");
+  const boxMat = new THREE.MeshPhysicalMaterial({ color: col, roughness: 0.62, sheen: 0.15, sheenRoughness: 0.8, sheenColor: col.clone().lerp(new THREE.Color(0xffffff), 0.5), bumpMap: rep(grain, 0.25, 0.25), bumpScale: 0.25 });
+  const ribMat = new THREE.MeshPhysicalMaterial({ color: "#fffaf3", roughness: 0.28, sheen: 1, sheenColor: new THREE.Color(0xffffff), clearcoat: 0.3 });
+  const W = 30, D = 22, H = 12;
+  const labelTex = canvasTex(512, (g, n) => {
+    g.fillStyle = "#" + col.getHexString(); g.fillRect(0, 0, n, n);
+    g.fillStyle = "#d9b45a"; g.font = "italic 64px Georgia, serif"; g.textAlign = "center";
+    g.fillText("Chique Bags", n / 2, n / 2 + 8);
+    g.font = "26px Georgia, serif"; g.fillText("HANDCRAFTED · MADE IN INDIA", n / 2, n / 2 + 56);
+  }, true);
+  const labelMat = boxMat.clone(); labelMat.map = labelTex; labelMat.bumpMap = null;
+  const base = mesh(new RoundedBoxGeometry(W, H, D, 6, 0.4), [boxMat, boxMat, boxMat, boxMat, labelMat, boxMat], root); base.position.y = H / 2;
+  const lidH = 5.2;
+  const lidMat = boxMat.clone();
+  lidMat.map = canvasTex(512, (g, n) => {
+    g.fillStyle = "#" + col.getHexString(); g.fillRect(0, 0, n, n);
+  }, true);
+  const lid = mesh(new RoundedBoxGeometry(W + 1.2, lidH, D + 1.2, 6, 0.4), lidMat, root); lid.position.y = H + lidH / 2 - 0.4;
+  // ribbon crossing the lid
+  const rt = H + lidH - 0.4 + 0.12;
+  const r1 = mesh(new RoundedBoxGeometry(2.6, 0.2, D + 1.5, 2, 0.08), ribMat, root); r1.position.set(0, rt, 0);
+  const r1s1 = mesh(new RoundedBoxGeometry(2.6, lidH + 0.1, 0.2, 2, 0.08), ribMat, root); r1s1.position.set(0, H + lidH / 2 - 0.4, D / 2 + 0.7);
+  const r1s2 = r1s1.clone(); r1s2.position.z = -D / 2 - 0.7; root.add(r1s2);
+  const r2 = mesh(new RoundedBoxGeometry(W + 1.5, 0.2, 2.6, 2, 0.08), ribMat, root); r2.position.set(0, rt + 0.03, 0);
+  // bow
+  const bow = new THREE.Group(); bow.position.set(0, rt + 0.1, 0); root.add(bow);
+  for (const s of [-1, 1]) {
+    const loop = mesh(new THREE.TorusGeometry(2.7, 0.55, 14, 40), ribMat, bow);
+    loop.scale.set(1.15, 1, 0.55); loop.position.set(s * 3.1, 2.6, 0); loop.rotation.set(0.15, 0, s * 0.35);
+    const tail = mesh(new RoundedBoxGeometry(2.1, 8.5, 0.18, 3, 0.07), ribMat, bow);
+    tail.position.set(s * 2.2, -0.1, D * 0.0 + 4.2); tail.rotation.set(-1.45, 0, s * 0.45);
+  }
+  mesh(new THREE.SphereGeometry(1.5, 24, 16), ribMat, bow).position.set(0, 1.9, 0);
+  // note card tucked under the bow, leaning out
+  const card = mesh(new THREE.BoxGeometry(14, 0.14, 10.5), [
+    new THREE.MeshStandardMaterial({ color: "#fffdf9" }), new THREE.MeshStandardMaterial({ color: "#fffdf9" }),
+    new THREE.MeshStandardMaterial({ map: noteCardTexture(cfg.note ?? "Happy birthday!|Love, Anaya"), roughness: 0.8 }),
+    new THREE.MeshStandardMaterial({ color: "#fffdf9" }), new THREE.MeshStandardMaterial({ color: "#fffdf9" }), new THREE.MeshStandardMaterial({ color: "#fffdf9" }),
+  ], root);
+  card.position.set(8.2, rt + 0.2, D / 2 + 2.4); card.rotation.set(0.1, -0.22, 0.02);
+  card.castShadow = true;
+  // gold seal
+  const seal = mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.15, 32), goldMat(), root);
+  seal.position.set(-11, rt + 0.1, 5.5);
+  return { root, height: H + lidH + 4, focus: new THREE.Vector3(0, (H + lidH) * 0.5, 0), detail: new THREE.Vector3(6, H + lidH, 5), box: true };
+}
+
+// ───────────────────────── scene / render ─────────────────────────
+const W = 1000, H = 1250;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.92;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envTex = pmrem.fromScene(new RoomEnvironment(), 0.03).texture;
+
+function backdrop(top, bottom) {
+  return canvasTex(512, (g, n) => {
+    const gr = g.createRadialGradient(n * 0.5, n * 0.42, n * 0.05, n * 0.5, n * 0.5, n * 0.75);
+    gr.addColorStop(0, top); gr.addColorStop(1, bottom);
+    g.fillStyle = gr; g.fillRect(0, 0, n, n);
+  }, true);
+}
+
+function contactShadowTex() {
+  return canvasTex(256, (g, n) => {
+    const gr = g.createRadialGradient(n / 2, n / 2, 0, n / 2, n / 2, n / 2);
+    gr.addColorStop(0, "rgba(40,20,25,0.55)"); gr.addColorStop(0.55, "rgba(40,20,25,0.22)"); gr.addColorStop(1, "rgba(40,20,25,0)");
+    g.clearRect(0, 0, n, n); g.fillStyle = gr; g.fillRect(0, 0, n, n);
+  }, true);
+}
+
+window.renderJob = async (job) => {
+  const w = job.width ?? W, h = job.height ?? H;
+  renderer.setSize(w, h);
+  const scene = new THREE.Scene();
+  scene.environment = envTex;
+  scene.environmentIntensity = job.env ?? 0.62;
+  scene.background = backdrop(job.bg?.[0] ?? "#fdf5f7", job.bg?.[1] ?? "#f3d7e1");
+
+  const built = job.kind === "gift" ? buildGiftBox(job.cfg) : buildBag(job.cfg);
+  const bag = built.root;
+  scene.add(bag);
+
+  // light
+  const key = new THREE.DirectionalLight(0xfff4ea, 1.9);
+  key.position.set(-34, 60, 46); key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 6; key.shadow.bias = -0.0004; key.shadow.normalBias = 0.05;
+  const sc = key.shadow.camera; sc.left = -45; sc.right = 45; sc.top = 55; sc.bottom = -25; sc.near = 10; sc.far = 220;
+  scene.add(key);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xf3d7e1, 0.32));
+  const rim = new THREE.DirectionalLight(0xffe6ee, 0.8); rim.position.set(40, 30, -40); scene.add(rim);
+
+  // floor: shadow catcher + soft contact shadow
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.ShadowMaterial({ opacity: 0.22 }));
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+  const fw = (job.cfg.w ?? 30) * 1.55, fd = (job.cfg.d ?? 10) * 3.6 + 8;
+  const contact = new THREE.Mesh(new THREE.PlaneGeometry(fw, fd), new THREE.MeshBasicMaterial({ map: contactShadowTex(), transparent: true, depthWrite: false }));
+  contact.rotation.x = -Math.PI / 2; contact.position.y = 0.02; scene.add(contact);
+
+  // pose
+  const view = job.view ?? "three";
+  const poses = {
+    three: { rot: -0.55, elev: 0.16, dist: 1.0, fov: 26 },
+    front: { rot: 0.08, elev: 0.1, dist: 1.0, fov: 26 },
+    side: { rot: -1.05, elev: 0.2, dist: 1.0, fov: 26 },
+    detail: { rot: -0.3, elev: 0.18, dist: 0.72, fov: 26, useDetail: true },
+    top: { rot: -0.35, elev: 0.55, dist: 0.95, fov: 26 },
+  };
+  const p = { ...(poses[view] ?? poses.three) };
+  if (job.cfg.elev !== undefined) p.elev = job.cfg.elev;
+  bag.rotation.y = job.rotate ?? p.rot;
+  const cam = new THREE.PerspectiveCamera(p.fov, w / h, 1, 600);
+  const target = (p.useDetail ? built.detail : built.focus).clone();
+  if (!p.useDetail) target.y = built.height * (job.targetY ?? 0.46);
+  target.applyEuler(new THREE.Euler(0, bag.rotation.y, 0));
+  const span = Math.max(built.height * 1.38, ((job.cfg.w ?? 26) * 1.36) / (w / h)) * (job.zoom ?? 1);
+  const dist = (span / 2) / Math.tan(THREE.MathUtils.degToRad(p.fov / 2)) * p.dist * (h / w > 1.2 ? 0.92 : 1);
+  cam.position.set(target.x, target.y + dist * Math.sin(p.elev), target.z + dist * Math.cos(p.elev));
+  cam.lookAt(target);
+
+  renderer.render(scene, cam);
+  await new Promise((r) => requestAnimationFrame(() => r()));
+  renderer.render(scene, cam);
+  return true;
+};
+window.sceneReady = true;
+</script>
+</body>
+</html>

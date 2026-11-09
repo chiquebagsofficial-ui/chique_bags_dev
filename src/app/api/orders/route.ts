@@ -12,6 +12,8 @@ const schema = z.object({
   method: z.enum(["COD", "ONLINE"]),
   couponCode: z.string().trim().max(40).nullish(),
   expectedTotal: z.number().int().nonnegative().optional(),
+  giftBox: z.boolean().optional(),
+  giftNote: z.string().trim().max(200, "Gift note can be up to 200 characters").nullish(),
 });
 
 export async function POST(req: Request) {
@@ -22,7 +24,7 @@ export async function POST(req: Request) {
 
   const parsed = await parseBody(req, schema);
   if ("error" in parsed) return parsed.error;
-  const { items, address, method, couponCode, expectedTotal } = parsed.data;
+  const { items, address, method, couponCode, expectedTotal, giftBox, giftNote } = parsed.data;
 
   const result = await createOrder({
     userId: user.id,
@@ -34,6 +36,8 @@ export async function POST(req: Request) {
     couponCode,
     method,
     expectedTotal,
+    giftBox,
+    giftNote,
   });
   if (!result.ok) return fail(result.error, result.status, { code: result.code, total: result.total });
 

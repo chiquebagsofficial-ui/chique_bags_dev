@@ -211,6 +211,9 @@ model Order {
   mrpTotal        Int // at MRP
   discount        Int           @default(0) // coupon discount
   shipping        Int           @default(0)
+  giftBox         Boolean       @default(false)
+  giftFee         Int           @default(0)
+  giftNote        String?
   total           Int
   couponCode      String?
   paymentMethod   PaymentMethod

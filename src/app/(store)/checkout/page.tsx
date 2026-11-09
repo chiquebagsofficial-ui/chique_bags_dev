@@ -19,6 +19,7 @@ export default async function CheckoutPage() {
       addresses={addresses.map((a) => ({ id: a.id, name: a.name, phone: a.phone, line1: a.line1, line2: a.line2 ?? "", city: a.city, state: a.state, pincode: a.pincode }))}
       codEnabled={settings.codEnabled}
       codFee={settings.codFee}
+      gift={{ enabled: settings.giftBoxEnabled, fee: settings.giftBoxFee, image: settings.giftBoxImage }}
       onlineAvailable={isGatewayConfigured() || isSimulatedPaymentAllowed()}
       simulated={isSimulatedPaymentAllowed()}
     />

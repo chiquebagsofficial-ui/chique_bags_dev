@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     prisma.product.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
     prisma.category.findMany({ where: { isActive: true }, select: { slug: true } }),
   ]);
-  const fixed = ["", "/shop", "/about", "/contact", "/shipping", "/returns", "/terms", "/privacy"].map((p) => ({ url: appUrl(p) }));
+  const fixed = ["", "/shop", "/gifting", "/about", "/contact", "/shipping", "/returns", "/terms", "/privacy"].map((p) => ({ url: appUrl(p) }));
   return [
     ...fixed,
     ...categories.map((c) => ({ url: appUrl(`/shop?category=${c.slug}`) })),

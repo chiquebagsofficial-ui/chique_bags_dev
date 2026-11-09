@@ -30,6 +30,7 @@ export default function Footer({ settings, categories }: { settings: Settings; c
             <li><Link href="/shop" className={link}>All bags</Link></li>
             {categories.map((c) => <li key={c.slug}><Link href={`/shop?category=${c.slug}`} className={link}>{c.name}</Link></li>)}
             <li><Link href="/shop?max=999" className={link}>Under ₹999</Link></li>
+            <li><Link href="/gifting" className={link}>Gifting</Link></li>
           </ul>
         </div>
 
