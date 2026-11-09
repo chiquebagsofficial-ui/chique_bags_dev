@@ -8,13 +8,13 @@ import { Images, LayoutDashboard, LogOut, Mail, Menu, Package, Settings, Shoppin
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
-  { href: "/admin/banners", label: "Banners", icon: Images },
+  // { href: "/admin/banners", label: "Banners", icon: Images },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: Tags },
   { href: "/admin/customers", label: "Customers", icon: Users },
-  { href: "/admin/coupons", label: "Coupons", icon: Tag },
-  { href: "/admin/messages", label: "Messages", icon: Mail },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  // { href: "/admin/coupons", label: "Coupons", icon: Tag },
+  // { href: "/admin/messages", label: "Messages", icon: Mail },
+  // { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export default function AdminShell({ adminName, unreadMessages, children }: { adminName: string; unreadMessages: number; children: React.ReactNode }) {
