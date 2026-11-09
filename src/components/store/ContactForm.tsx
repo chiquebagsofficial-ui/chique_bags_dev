@@ -38,7 +38,7 @@ export default function ContactForm() {
       </div>
       <div><label className="label" htmlFor="c-phone">Phone (optional)</label><input id="c-phone" inputMode="tel" className="input" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></div>
       <div><label className="label" htmlFor="c-msg">Message</label><textarea id="c-msg" required minLength={10} className="input min-h-36" value={f.message} onChange={(e) => setF({ ...f, message: e.target.value })} /></div>
-      {error && <p role="alert" className="rounded-xl bg-blush p-3 text-sm font-medium text-berry">{error}</p>}
+      {error && <p role="alert" className="rounded-sm bg-blush p-3 text-sm font-medium text-berry">{error}</p>}
       <button className="btn btn-dark" disabled={state === "busy"}>{state === "busy" ? "Sending…" : "Send message"}</button>
     </form>
   );

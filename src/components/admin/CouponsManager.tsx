@@ -65,7 +65,7 @@ export default function CouponsManager({ coupons }: { coupons: CouponRow[] }) {
             <label className="flex items-center gap-2"><input type="checkbox" checked={f.oncePerUser} onChange={(e) => setF({ ...f, oncePerUser: e.target.checked })} className="accent-[#1a1a1a]" /> One use per customer</label>
             <label className="flex items-center gap-2"><input type="checkbox" checked={f.isActive} onChange={(e) => setF({ ...f, isActive: e.target.checked })} className="accent-[#1a1a1a]" /> Active</label>
           </div>
-          {error && <p role="alert" className="rounded-xl bg-blush p-3 text-sm font-medium text-berry sm:col-span-2 lg:col-span-3">{error}</p>}
+          {error && <p role="alert" className="rounded-sm bg-blush p-3 text-sm font-medium text-berry sm:col-span-2 lg:col-span-3">{error}</p>}
           <div className="flex gap-3 sm:col-span-2 lg:col-span-3"><button className="btn btn-dark btn-sm" disabled={busy}>{busy ? "Saving…" : "Save coupon"}</button><button type="button" className="btn btn-line btn-sm" onClick={() => setEditing(null)}>Cancel</button></div>
         </form>
       )}

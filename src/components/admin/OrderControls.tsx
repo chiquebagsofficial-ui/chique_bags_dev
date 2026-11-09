@@ -34,7 +34,7 @@ export default function OrderControls({ id, status, courier, trackingUrl, needsA
   return (
     <section className="card space-y-4 p-6">
       <h2 className="font-serif text-lg font-semibold">Manage order</h2>
-      {awaitingPayment && <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">Waiting for online payment. Status can be changed once it's paid.</p>}
+      {awaitingPayment && <p className="rounded-sm bg-amber-50 p-3 text-sm text-amber-900">Waiting for online payment. Status can be changed once it's paid.</p>}
       <div>
         <label className="label" htmlFor="oc-status">Status</label>
         <select id="oc-status" className="input" value={next} disabled={locked || awaitingPayment} onChange={(e) => setNext(e.target.value)}>

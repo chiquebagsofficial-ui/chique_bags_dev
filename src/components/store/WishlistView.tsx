@@ -33,7 +33,7 @@ export default function WishlistView() {
       <p className="mt-2 text-muted">{user ? "Saved to your account, so you'll see them on any device." : <><Link href="/login?next=/wishlist" className="underline">Log in</Link> to keep your favourites across devices.</>}</p>
 
       {visible === undefined ? (
-        <div className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-4">{[0, 1, 2, 3].map((n) => <div key={n} className="aspect-[4/5] animate-pulse rounded-2xl bg-cream" />)}</div>
+        <div className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-4">{[0, 1, 2, 3].map((n) => <div key={n} className="aspect-[4/5] animate-pulse rounded-sm bg-cream" />)}</div>
       ) : visible.length === 0 ? (
         <div className="py-24 text-center">
           <Heart size={44} className="mx-auto text-rose-soft" />

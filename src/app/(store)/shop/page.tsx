@@ -101,9 +101,9 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             <span className="text-muted">{total} {total === 1 ? "bag" : "bags"}</span>
             <details className="relative">
               <summary className="chip cursor-pointer list-none">Sort: {SORTS[sort].label}</summary>
-              <div className="absolute right-0 z-20 mt-2 w-52 rounded-2xl border border-line bg-white p-2 shadow-xl">
+              <div className="absolute right-0 z-20 mt-2 w-52 rounded-sm border border-line bg-white p-2 shadow-xl">
                 {(Object.keys(SORTS) as SortKey[]).map((k) => (
-                  <Link key={k} href={href({ sort: k === "newest" ? null : k })} className={`block rounded-xl px-4 py-2.5 text-sm hover:bg-blush ${k === sort ? "font-semibold text-rose" : ""}`}>{SORTS[k].label}</Link>
+                  <Link key={k} href={href({ sort: k === "newest" ? null : k })} className={`block rounded-sm px-4 py-2.5 text-sm hover:bg-blush ${k === sort ? "font-semibold text-rose" : ""}`}>{SORTS[k].label}</Link>
                 ))}
               </div>
             </details>

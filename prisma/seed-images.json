@@ -1,65 +1,51 @@
 {
-  "giftBox": "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259751/chique-bags/seed/gift-box.jpg",
+  "site": {
+    "banner-new-season": "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261057/chique-bags/stock/banner-new-season.jpg",
+    "banner-gifting": "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261059/chique-bags/stock/banner-gifting.jpg",
+    "banner-collection": "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261060/chique-bags/stock/banner-collection.jpg",
+    "gift-box": "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261061/chique-bags/stock/gift-box.jpg",
+    "story": "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261063/chique-bags/stock/story.jpg",
+    "category-crossbody": "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261065/chique-bags/stock/category-crossbody.jpg"
+  },
   "products": {
     "the-petite-crescent-sling": [
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259771/chique-bags/seed/the-petite-crescent-sling__three.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259770/chique-bags/seed/the-petite-crescent-sling__front.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259769/chique-bags/seed/the-petite-crescent-sling__detail.jpg"
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261067/chique-bags/stock/the-petite-crescent-sling-1.jpg"
     ],
-    "aura-quilted-gold-chain-sling": [
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259741/chique-bags/seed/aura-quilted-gold-chain-sling__three.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259740/chique-bags/seed/aura-quilted-gold-chain-sling__front.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259739/chique-bags/seed/aura-quilted-gold-chain-sling__detail.jpg"
+    "aura-quilted-chain-clutch": [
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261068/chique-bags/stock/aura-quilted-chain-clutch-1.jpg",
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261069/chique-bags/stock/aura-quilted-chain-clutch-2.jpg"
     ],
-    "cloud-puffer-crossbody-sling": [
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259750/chique-bags/seed/cloud-puffer-crossbody-sling__three.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259749/chique-bags/seed/cloud-puffer-crossbody-sling__front.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259748/chique-bags/seed/cloud-puffer-crossbody-sling__detail.jpg"
+    "coral-chain-sling": [
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261070/chique-bags/stock/coral-chain-sling-1.jpg"
     ],
-    "petite-structured-mini-sling": [
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259768/chique-bags/seed/petite-structured-mini-sling__three.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259767/chique-bags/seed/petite-structured-mini-sling__front.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259766/chique-bags/seed/petite-structured-mini-sling__detail.jpg"
+    "rose-quilted-top-handle-bag": [
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261071/chique-bags/stock/rose-quilted-top-handle-bag-1.jpg"
     ],
-    "parisian-vegan-leather-sling": [
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259765/chique-bags/seed/parisian-vegan-leather-sling__three.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259764/chique-bags/seed/parisian-vegan-leather-sling__front.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259763/chique-bags/seed/parisian-vegan-leather-sling__detail.jpg"
+    "blush-turn-lock-satchel": [
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261072/chique-bags/stock/blush-turn-lock-satchel-1.jpg"
     ],
-    "metro-daily-crossbody-pouch": [
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259756/chique-bags/seed/metro-daily-crossbody-pouch__three.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259755/chique-bags/seed/metro-daily-crossbody-pouch__front.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259754/chique-bags/seed/metro-daily-crossbody-pouch__detail.jpg"
+    "petal-pink-mini-flap-bag": [
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261074/chique-bags/stock/petal-pink-mini-flap-bag-1.jpg"
     ],
-    "velvet-shimmer-evening-sling": [
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259773/chique-bags/seed/velvet-shimmer-evening-sling__three.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259772/chique-bags/seed/velvet-shimmer-evening-sling__front.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259772/chique-bags/seed/velvet-shimmer-evening-sling__detail.jpg"
+    "midnight-bucket-chain-bag": [
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261075/chique-bags/stock/midnight-bucket-chain-bag-1.jpg"
     ],
-    "caramel-latte-explorer-sling": [
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259747/chique-bags/seed/caramel-latte-explorer-sling__three.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259746/chique-bags/seed/caramel-latte-explorer-sling__front.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259745/chique-bags/seed/caramel-latte-explorer-sling__detail.jpg"
+    "saddle-tan-crossbody": [
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261076/chique-bags/stock/saddle-tan-crossbody-1.jpg"
     ],
-    "ivory-pearl-crescent-mini": [
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259753/chique-bags/seed/ivory-pearl-crescent-mini__three.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259752/chique-bags/seed/ivory-pearl-crescent-mini__front.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259752/chique-bags/seed/ivory-pearl-crescent-mini__detail.jpg"
+    "metro-daily-camera-pouch": [
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261078/chique-bags/stock/metro-daily-camera-pouch-1.jpg",
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261080/chique-bags/stock/metro-daily-camera-pouch-2.jpg"
     ],
-    "midnight-quilted-mini-chain-bag": [
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259759/chique-bags/seed/midnight-quilted-mini-chain-bag__three.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259758/chique-bags/seed/midnight-quilted-mini-chain-bag__front.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259757/chique-bags/seed/midnight-quilted-mini-chain-bag__detail.jpg"
+    "cognac-woven-chain-tote": [
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261081/chique-bags/stock/cognac-woven-chain-tote-1.jpg"
     ],
-    "blush-puffer-mini-pouch": [
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259744/chique-bags/seed/blush-puffer-mini-pouch__three.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259743/chique-bags/seed/blush-puffer-mini-pouch__front.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259742/chique-bags/seed/blush-puffer-mini-pouch__detail.jpg"
+    "slate-buckle-satchel": [
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261082/chique-bags/stock/slate-buckle-satchel-1.jpg"
     ],
-    "olive-everyday-crossbody": [
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259762/chique-bags/seed/olive-everyday-crossbody__three.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259761/chique-bags/seed/olive-everyday-crossbody__front.jpg",
-      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794259760/chique-bags/seed/olive-everyday-crossbody__detail.jpg"
+    "cocoa-leather-messenger": [
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261083/chique-bags/stock/cocoa-leather-messenger-1.jpg",
+      "https://res.cloudinary.com/hmnstq5i/image/upload/v1794261084/chique-bags/stock/cocoa-leather-messenger-2.jpg"
     ]
   }
 }

@@ -7,7 +7,7 @@ export default function CouponBox({ applied, error, onApply, onRemove }: { appli
   const [code, setCode] = useState("");
   if (applied) {
     return (
-      <div className="flex items-center justify-between rounded-xl bg-blush px-4 py-3 text-sm">
+      <div className="flex items-center justify-between rounded-sm bg-blush px-4 py-3 text-sm">
         <span className="flex items-center gap-2 font-semibold text-berry"><Tag size={15} /> {applied} applied</span>
         <button onClick={onRemove} aria-label="Remove coupon" className="text-muted hover:text-ink"><X size={16} /></button>
       </div>

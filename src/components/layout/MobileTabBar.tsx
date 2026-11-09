@@ -24,7 +24,7 @@ export default function MobileTabBar() {
       </Link>
       <Link href={user ? "/account" : "/login"} className={`${tab} ${on("/account") || on("/login") ? "text-rose" : "text-muted"}`}><User size={20} />{user ? "Account" : "Log in"}</Link>
       <button onClick={() => cart.setDrawerOpen(true)} className={`${tab} text-muted`}>
-        <span className="relative"><ShoppingBag size={20} />{cart.count > 0 && <i className="absolute -right-2 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-ink px-1 text-[0.6rem] not-italic text-white">{cart.count}</i>}</span>
+        <span className="relative"><ShoppingBag size={20} />{cart.count > 0 && <i className="absolute -right-2 -top-1.5 grid h-4 min-w-4 place-items-center rounded-none bg-ink px-1 text-[0.6rem] not-italic text-white">{cart.count}</i>}</span>
         Bag
       </button>
     </nav>

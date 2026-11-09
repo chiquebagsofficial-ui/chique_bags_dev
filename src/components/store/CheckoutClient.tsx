@@ -230,13 +230,13 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
             <h2 className="mb-4 flex items-center gap-3 font-serif text-xl font-semibold"><span className="grid h-7 w-7 place-items-center rounded-full bg-ink text-sm text-white">2</span> Delivery address</h2>
             <div className="space-y-3">
               {addresses.map((a) => (
-                <label key={a.id} className={cn("flex cursor-pointer gap-3 rounded-xl border-[1.5px] p-4 text-sm", selected === a.id ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
+                <label key={a.id} className={cn("flex cursor-pointer gap-3 rounded-sm border-[1.5px] p-4 text-sm", selected === a.id ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
                   <input type="radio" name="addr" className="mt-1 accent-[#1a1a1a]" checked={selected === a.id} onChange={() => setSelected(a.id!)} />
                   <span><strong>{a.name}</strong> · {a.phone}<br />{a.line1}{a.line2 && `, ${a.line2}`}<br />{a.city}, {a.state} {a.pincode}</span>
                 </label>
               ))}
               {addresses.length > 0 && (
-                <label className={cn("flex cursor-pointer items-center gap-3 rounded-xl border-[1.5px] p-4 text-sm font-medium", selected === "new" ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
+                <label className={cn("flex cursor-pointer items-center gap-3 rounded-sm border-[1.5px] p-4 text-sm font-medium", selected === "new" ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
                   <input type="radio" name="addr" className="accent-[#1a1a1a]" checked={selected === "new"} onChange={() => setSelected("new")} /> Use a new address
                 </label>
               )}
@@ -259,9 +259,9 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
           {gift.enabled && (
             <section className={cn("card p-6 transition", !user && "pointer-events-none opacity-50")}>
               <h2 className="mb-4 flex items-center gap-3 font-serif text-xl font-semibold"><span className="grid h-7 w-7 place-items-center rounded-full bg-ink text-sm text-white">3</span> Gift options</h2>
-              <label className={cn("flex cursor-pointer items-start gap-4 rounded-xl border-[1.5px] p-4", giftBox ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
+              <label className={cn("flex cursor-pointer items-start gap-4 rounded-sm border-[1.5px] p-4", giftBox ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
                 <input type="checkbox" className="mt-1 h-4 w-4 accent-[#1a1a1a]" checked={giftBox} onChange={(e) => setGiftBox(e.target.checked)} />
-                {gift.image && <span className="relative hidden h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-white sm:block"><Image src={gift.image} alt="" fill sizes="80px" className="object-cover" /></span>}
+                {gift.image && <span className="relative hidden h-20 w-20 shrink-0 overflow-hidden rounded-sm bg-white sm:block"><Image src={gift.image} alt="" fill sizes="80px" className="object-cover" /></span>}
                 <span className="text-sm">
                   <span className="flex items-center gap-2 font-semibold"><Gift size={17} /> Add a gift box {gift.fee > 0 ? `for ${formatINR(gift.fee)}` : "(free)"}</span>
                   <span className="text-muted">Your bag arrives in our signature gift box with tissue and ribbon, with a handwritten note card from you.</span>
@@ -282,13 +282,13 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
             <h2 className="mb-4 flex items-center gap-3 font-serif text-xl font-semibold"><span className="grid h-7 w-7 place-items-center rounded-full bg-ink text-sm text-white">{gift.enabled ? 4 : 3}</span> Payment</h2>
             <div className="space-y-3">
               {onlineAvailable && (
-                <label className={cn("flex cursor-pointer items-start gap-3 rounded-xl border-[1.5px] p-4", method === "ONLINE" ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
+                <label className={cn("flex cursor-pointer items-start gap-3 rounded-sm border-[1.5px] p-4", method === "ONLINE" ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
                   <input type="radio" name="pay" className="mt-1 accent-[#1a1a1a]" checked={method === "ONLINE"} onChange={() => setMethod("ONLINE")} />
                   <span className="text-sm"><span className="flex items-center gap-2 font-semibold"><CreditCard size={17} /> Pay online</span><span className="text-muted">UPI, cards, net banking and wallets{simulated && " (test mode, no real payment)"}</span></span>
                 </label>
               )}
               {codEnabled && (
-                <label className={cn("flex cursor-pointer items-start gap-3 rounded-xl border-[1.5px] p-4", method === "COD" ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
+                <label className={cn("flex cursor-pointer items-start gap-3 rounded-sm border-[1.5px] p-4", method === "COD" ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
                   <input type="radio" name="pay" className="mt-1 accent-[#1a1a1a]" checked={method === "COD"} onChange={() => setMethod("COD")} />
                   <span className="text-sm"><span className="flex items-center gap-2 font-semibold"><Banknote size={17} /> Cash on delivery</span><span className="text-muted">Pay when your order arrives{codFee > 0 && ` (+${formatINR(codFee)} fee)`}</span></span>
                 </label>
@@ -303,7 +303,7 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
           <ul className="space-y-4">
             {cart.items.map((i) => (
               <li key={i.variantId} className="flex items-center gap-3 text-sm">
-                <span className="relative h-16 w-14 shrink-0 overflow-hidden rounded-lg bg-cream">
+                <span className="relative h-16 w-14 shrink-0 overflow-hidden rounded-sm bg-cream">
                   {i.image && <Image src={i.image} alt="" fill sizes="56px" className="object-cover" />}
                   <span className="absolute -right-0 -top-0 grid h-5 min-w-5 place-items-center rounded-bl-lg bg-ink px-1 text-[0.65rem] font-bold text-white">{i.quantity}</span>
                 </span>
@@ -314,8 +314,8 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
           </ul>
           <CouponBox applied={data?.couponCode ?? null} error={data?.couponError ?? null} onApply={setCoupon} onRemove={() => setCoupon(null)} />
           {data ? <PriceSummary p={data} /> : error ? null : <p className="text-sm text-muted">Calculating…</p>}
-          {error && <p className="rounded-xl bg-blush p-3 text-sm font-medium text-berry">{error.message} <Link href="/cart" className="underline">Review your bag</Link></p>}
-          {message && <p role="alert" className="rounded-xl bg-blush p-3 text-sm font-medium text-berry">{message}</p>}
+          {error && <p className="rounded-sm bg-blush p-3 text-sm font-medium text-berry">{error.message} <Link href="/cart" className="underline">Review your bag</Link></p>}
+          {message && <p role="alert" className="rounded-sm bg-blush p-3 text-sm font-medium text-berry">{message}</p>}
           <button className="btn btn-dark btn-block !py-4" disabled={!ready || busy} onClick={placeOrder}>
             <Lock size={15} /> {busy ? "Please wait…" : method === "COD" ? `Place order · ${data ? formatINR(data.total) : ""}` : `Pay ${data ? formatINR(data.total) : ""}`}
           </button>
@@ -326,7 +326,7 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
 
       {testPay && (
         <div className="fixed inset-0 z-[400] grid place-items-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-3xl bg-white p-7 text-center shadow-2xl">
+          <div className="w-full max-w-sm rounded-sm bg-white p-7 text-center shadow-2xl">
             <p className="eyebrow">Test payment</p>
             <h3 className="font-serif mt-2 text-2xl font-semibold">Razorpay isn't connected yet</h3>
             <p className="mt-2 text-sm text-muted">This is a development-only stand-in for the payment window. Choose the outcome to test.</p>

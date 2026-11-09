@@ -27,10 +27,10 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
         <div className="flex items-center gap-3"><StatusBadge status={order.status} /><Link href={`/admin/orders/${order.id}/invoice`} target="_blank" className="btn btn-line btn-sm">Invoice</Link></div>
       </div>
 
-      {order.needsAttention && order.notes && <p className="mb-6 flex items-start gap-2 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"><AlertTriangle size={18} className="mt-0.5 shrink-0" /> {order.notes}</p>}
+      {order.needsAttention && order.notes && <p className="mb-6 flex items-start gap-2 rounded-sm border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"><AlertTriangle size={18} className="mt-0.5 shrink-0" /> {order.notes}</p>}
 
       {order.giftBox && (
-        <section className="mb-6 rounded-2xl border border-rose-soft bg-blush p-5 text-sm">
+        <section className="mb-6 rounded-sm border border-rose-soft bg-blush p-5 text-sm">
           <p className="flex items-center gap-2 font-semibold text-berry"><Gift size={18} /> Pack this order in a gift box</p>
           {order.giftNote ? <p className="mt-2 whitespace-pre-wrap text-base leading-relaxed">Note card: <em>“{order.giftNote}”</em></p> : <p className="mt-1 text-muted">No note was written.</p>}
         </section>
@@ -43,7 +43,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
             <ul className="divide-y divide-line">
               {order.items.map((i) => (
                 <li key={i.id} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-                  <span className="relative h-16 w-13 shrink-0 overflow-hidden rounded-lg bg-cream" style={{ width: 52 }}>{i.image && <Image src={i.image} alt="" fill sizes="52px" className="object-cover" />}</span>
+                  <span className="relative h-16 w-13 shrink-0 overflow-hidden rounded-sm bg-cream" style={{ width: 52 }}>{i.image && <Image src={i.image} alt="" fill sizes="52px" className="object-cover" />}</span>
                   <div className="flex-1 text-sm"><p className="font-medium">{i.name}</p><p className="text-muted">{i.variantName} × {i.quantity} · {formatINR(i.price)} each</p></div>
                   <span className="font-semibold">{formatINR(i.price * i.quantity)}</span>
                 </li>

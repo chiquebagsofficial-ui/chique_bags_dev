@@ -7,16 +7,15 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Image URLs come from tools/render (studio renders uploaded to Cloudinary).
-const images: { giftBox: string; products: Record<string, string[]> } = JSON.parse(
+// Photo URLs come from scripts/stock-photos.mjs (real stock photographs uploaded to Cloudinary).
+const images: { site: Record<string, string>; products: Record<string, string[]> } = JSON.parse(
   fs.readFileSync(path.join(__dirname, "seed-images.json"), "utf8")
 );
-const first = (slug: string) => images.products[slug]?.[0] ?? null;
 
 const categories = [
-  { name: "Crescent Slings", slug: "crescent-slings", description: "Soft half-moon silhouettes that sit right at your hip.", image: first("the-petite-crescent-sling"), sortOrder: 10 },
-  { name: "Quilted & Chain", slug: "quilted-chain", description: "Quilted textures with gold-finish chain straps.", image: first("aura-quilted-gold-chain-sling"), sortOrder: 20 },
-  { name: "Crossbody Bags", slug: "crossbody-bags", description: "Everyday crossbodies sized for the essentials.", image: first("cloud-puffer-crossbody-sling"), sortOrder: 30 },
+  { name: "Crescent & Mini", slug: "crescent-slings", description: "Small, sculpted shapes for the essentials.", image: images.products["the-petite-crescent-sling"]?.[0] ?? null, sortOrder: 10 },
+  { name: "Quilted & Chain", slug: "quilted-chain", description: "Quilted textures and gold-tone chain straps.", image: images.products["rose-quilted-top-handle-bag"]?.[0] ?? null, sortOrder: 20 },
+  { name: "Crossbody & Everyday", slug: "crossbody-bags", description: "Easy bags for every day of the week.", image: images.site["category-crossbody"] ?? null, sortOrder: 30 },
 ];
 
 type SeedProduct = {
@@ -33,18 +32,25 @@ type SeedProduct = {
 };
 
 const products: SeedProduct[] = [
-  { name: "The Petite Crescent Sling", slug: "the-petite-crescent-sling", category: "crescent-slings", price: 1299, mrp: 2199, short: "A half-moon sling in premium vegan leather with a gold-finish zip and a flat shoulder strap.", tags: ["crescent", "bestseller", "pink"], flags: { isBestSeller: true, isFeatured: true }, dimensions: "26 cm wide × 13 cm high × 5 cm deep", colours: [["Dusty Rose", "#d98ba4", 14], ["Onyx Black", "#222222", 10], ["Ivory Cream", "#ede6dd", 8]] },
-  { name: "Aura Quilted Gold-Chain Sling", slug: "aura-quilted-gold-chain-sling", category: "quilted-chain", price: 1499, mrp: 2499, short: "Diamond-quilted flap sling with a turn-lock clasp and a removable gold-finish chain strap.", tags: ["chain", "quilted", "black", "bestseller"], flags: { isBestSeller: true, isFeatured: true }, dimensions: "24 cm wide × 15 cm high × 7 cm deep", colours: [["Matte Black", "#181818", 12], ["Metallic Gold", "#d4af37", 6]] },
-  { name: "Cloud Puffer Crossbody Sling", slug: "cloud-puffer-crossbody-sling", category: "crossbody-bags", price: 899, mrp: 1599, short: "A soft, channel-puffed crossbody that feels like carrying a cloud.", tags: ["under999", "puffer", "crossbody"], flags: { isFeatured: true }, dimensions: "26 cm wide × 16 cm high × 9 cm deep", colours: [["Sage Green", "#9fb59a", 9], ["Cloud Pink", "#f4cbd8", 9], ["Black", "#222222", 12]] },
-  { name: "Petite Structured Mini Sling", slug: "petite-structured-mini-sling", category: "crescent-slings", price: 949, mrp: 1699, short: "A structured mini sling, just big enough for phone, cards and lip balm.", tags: ["under999", "crescent", "mini"], flags: {}, dimensions: "17 cm wide × 12 cm high × 6 cm deep", colours: [["Nude Tan", "#d9c8b4", 11], ["Chalk White", "#ffffff", 7]] },
-  { name: "Parisian Vegan Leather Sling", slug: "parisian-vegan-leather-sling", category: "quilted-chain", price: 1399, mrp: 2299, short: "Smooth vegan leather with a turn-lock flap and chain strap, made for city evenings.", tags: ["chain", "burgundy", "bestseller"], flags: { isNew: true, isBestSeller: true }, dimensions: "23 cm wide × 15 cm high × 7 cm deep", colours: [["Burgundy", "#5a1f2a", 8], ["Classic Black", "#111111", 10]] },
-  { name: "Metro Daily Crossbody Pouch", slug: "metro-daily-crossbody-pouch", category: "crossbody-bags", price: 799, mrp: 1399, short: "A no-fuss daily pouch with a zip top, front zip pocket and adjustable strap.", tags: ["under999", "crossbody", "daily"], flags: { isNew: true }, dimensions: "22 cm wide × 15 cm high × 6.5 cm deep", colours: [["Charcoal", "#2c2c30", 15], ["Mocha", "#9e8e7a", 10]] },
-  { name: "Velvet Shimmer Evening Sling", slug: "velvet-shimmer-evening-sling", category: "quilted-chain", price: 1599, mrp: 2699, short: "A shimmer-finish quilted evening sling with a gold chain for party nights.", tags: ["party", "chain", "quilted", "shimmer"], flags: { isNew: true }, dimensions: "22 cm wide × 14 cm high × 7 cm deep", colours: [["Blush Shimmer", "#e8a9bd", 6], ["Champagne Gold", "#d4af37", 5]] },
-  { name: "Caramel Latte Explorer Sling", slug: "caramel-latte-explorer-sling", category: "crossbody-bags", price: 1199, mrp: 1999, short: "Roomy enough for a small water bottle, stylish enough for brunch.", tags: ["bestseller", "crossbody", "tan"], flags: { isBestSeller: true }, dimensions: "24 cm wide × 17 cm high × 8 cm deep", colours: [["Caramel Latte", "#a06b45", 10], ["Onyx", "#222222", 10]] },
-  { name: "Ivory Pearl Crescent Mini", slug: "ivory-pearl-crescent-mini", category: "crescent-slings", price: 1099, mrp: 1799, short: "A petite ivory half-moon with a gold chain strap. Small bag, big statement.", tags: ["crescent", "ivory", "mini", "chain"], flags: { isNew: true }, dimensions: "21 cm wide × 10.5 cm high × 4 cm deep", colours: [["Ivory", "#efe6d6", 9], ["Blush", "#f1c3cf", 6]] },
-  { name: "Midnight Quilted Mini Chain Bag", slug: "midnight-quilted-mini-chain-bag", category: "quilted-chain", price: 1349, mrp: 2199, short: "A mini quilted flap bag in deep midnight blue with a polished gold chain.", tags: ["chain", "quilted", "navy", "mini"], flags: { isNew: true }, dimensions: "19 cm wide × 13 cm high × 6 cm deep", colours: [["Midnight Blue", "#1f2b4d", 8], ["Black", "#181818", 8]] },
-  { name: "Blush Puffer Mini Pouch", slug: "blush-puffer-mini-pouch", category: "crossbody-bags", price: 849, mrp: 1499, short: "A mini puffer pouch in soft blush with a zip top and adjustable strap.", tags: ["under999", "puffer", "mini", "pink"], flags: {}, dimensions: "21 cm wide × 14 cm high × 8 cm deep", colours: [["Blush", "#ea9fb4", 12], ["Sage", "#9fb59a", 8]] },
-  { name: "Olive Everyday Crossbody", slug: "olive-everyday-crossbody", category: "crossbody-bags", price: 999, mrp: 1699, short: "An easy olive-green crossbody with a zip top and a roomy front pocket.", tags: ["under999", "crossbody", "daily", "olive"], flags: { isBestSeller: true }, dimensions: "23 cm wide × 16 cm high × 7 cm deep", colours: [["Olive", "#6b7350", 10], ["Charcoal", "#2c2c30", 10]] },
+  { name: "The Petite Crescent Sling", slug: "the-petite-crescent-sling", category: "crescent-slings", price: 1299, mrp: 2199, short: "A half-moon sling in soft vegan leather with a gold-finish zip and a flat shoulder strap.", tags: ["crescent", "tan", "bestseller"], flags: { isBestSeller: true, isFeatured: true }, dimensions: "26 cm wide × 13 cm high × 5 cm deep", colours: [["Caramel Tan", "#b87f4f", 12], ["Onyx Black", "#1c1c1c", 10], ["Ivory", "#efe6d6", 8]] },
+  { name: "Aura Quilted Chain Clutch", slug: "aura-quilted-chain-clutch", category: "quilted-chain", price: 1499, mrp: 2499, short: "A diamond-quilted clutch with a fine gold-tone chain you can wear on the shoulder or tuck away.", tags: ["chain", "quilted", "white", "bestseller"], flags: { isBestSeller: true, isFeatured: true }, dimensions: "23 cm wide × 13 cm high × 5 cm deep", colours: [["Ivory White", "#f4f1ec", 8], ["Matte Black", "#181818", 10]] },
+  { name: "Coral Chain Sling", slug: "coral-chain-sling", category: "quilted-chain", price: 1599, mrp: 2599, short: "A bold coral flap bag with a heavy gold-tone chain strap. Impossible to miss.", tags: ["chain", "coral", "party"], flags: { isNew: true, isFeatured: true }, dimensions: "24 cm wide × 15 cm high × 7 cm deep", colours: [["Coral", "#e8552f", 7], ["Black", "#181818", 9]] },
+  { name: "Rosé Quilted Top-Handle Bag", slug: "rose-quilted-top-handle-bag", category: "quilted-chain", price: 1799, mrp: 2899, short: "A structured top-handle bag in quilted rosé with a teardrop clasp and a detachable strap.", tags: ["quilted", "pink", "handle", "bestseller"], flags: { isBestSeller: true }, dimensions: "22 cm wide × 17 cm high × 9 cm deep", colours: [["Rosé", "#d99a93", 6], ["Black", "#181818", 6]] },
+  { name: "Blush Turn-Lock Satchel", slug: "blush-turn-lock-satchel", category: "crossbody-bags", price: 1699, mrp: 2799, short: "A soft blush satchel with a polished turn-lock and a top handle, roomy enough for daily essentials.", tags: ["satchel", "pink", "turn-lock"], flags: { isNew: true }, dimensions: "24 cm wide × 18 cm high × 9 cm deep", colours: [["Blush", "#e8b4b5", 6], ["Tan", "#b87f4f", 6]] },
+  { name: "Petal Pink Mini Flap Bag", slug: "petal-pink-mini-flap-bag", category: "crescent-slings", price: 1099, mrp: 1799, short: "A small structured flap bag in petal pink with a gold-tone clasp. Phone, cards and a lipstick.", tags: ["mini", "pink", "flap"], flags: { isNew: true }, dimensions: "19 cm wide × 12 cm high × 6 cm deep", colours: [["Petal Pink", "#f0a9bf", 9], ["Ivory", "#efe6d6", 6]] },
+  { name: "Midnight Bucket Chain Bag", slug: "midnight-bucket-chain-bag", category: "quilted-chain", price: 1399, mrp: 2299, short: "A black drawstring bucket bag with a gold-tone chain closure. Casual by day, dressy by night.", tags: ["bucket", "black", "chain", "bestseller"], flags: { isBestSeller: true }, dimensions: "20 cm wide × 22 cm high × 12 cm deep", colours: [["Black", "#181818", 10]] },
+  { name: "Saddle Tan Crossbody", slug: "saddle-tan-crossbody", category: "crossbody-bags", price: 1199, mrp: 1999, short: "A classic saddle-shaped crossbody in warm tan with an adjustable strap.", tags: ["crossbody", "tan", "bestseller"], flags: { isBestSeller: true }, dimensions: "21 cm wide × 17 cm high × 7 cm deep", colours: [["Saddle Tan", "#b4693a", 10], ["Black", "#181818", 8]] },
+  { name: "Metro Daily Camera Pouch", slug: "metro-daily-camera-pouch", category: "crossbody-bags", price: 799, mrp: 1399, short: "A no-fuss black crossbody with a zip top, a front pocket and a strap that adjusts to your height.", tags: ["under999", "crossbody", "daily", "black"], flags: { isNew: true }, dimensions: "22 cm wide × 15 cm high × 7 cm deep", colours: [["Black", "#1c1c1c", 15], ["Mocha", "#8a6f5c", 10]] },
+  { name: "Cognac Woven Chain Tote", slug: "cognac-woven-chain-tote", category: "crossbody-bags", price: 1899, mrp: 2999, short: "A woven-leather tote in cognac with a gold-tone chain detail. Room for a laptop and a lunch.", tags: ["tote", "woven", "brown", "chain"], flags: { isNew: true }, dimensions: "34 cm wide × 26 cm high × 11 cm deep", colours: [["Cognac", "#a3562c", 5]] },
+  { name: "Slate Buckle Satchel", slug: "slate-buckle-satchel", category: "crossbody-bags", price: 1699, mrp: 2699, short: "A structured satchel in slate grey with twin buckles, a top handle and a long crossbody strap.", tags: ["satchel", "grey", "buckle"], flags: {}, dimensions: "26 cm wide × 19 cm high × 10 cm deep", colours: [["Slate Grey", "#8a8a90", 6]] },
+  { name: "Cocoa Leather Messenger", slug: "cocoa-leather-messenger", category: "crossbody-bags", price: 949, mrp: 1699, short: "A relaxed messenger-style crossbody in cocoa brown with a flap closure and a roomy main compartment.", tags: ["under999", "messenger", "brown", "crossbody"], flags: {}, dimensions: "25 cm wide × 18 cm high × 7 cm deep", colours: [["Cocoa", "#6b4226", 10], ["Black", "#181818", 8]] },
+];
+
+// Sample products from earlier seeds (illustrations) that no longer exist. Past orders keep their own copy.
+const LEGACY_SLUGS = [
+  "aura-quilted-gold-chain-sling", "cloud-puffer-crossbody-sling", "petite-structured-mini-sling", "parisian-vegan-leather-sling",
+  "metro-daily-crossbody-pouch", "velvet-shimmer-evening-sling", "caramel-latte-explorer-sling", "ivory-pearl-crescent-mini",
+  "midnight-quilted-mini-chain-bag", "blush-puffer-mini-pouch", "olive-everyday-crossbody",
 ];
 
 async function main() {
@@ -67,10 +73,13 @@ async function main() {
     await prisma.category.upsert({
       where: { slug: c.slug },
       create: c,
-      update: { description: c.description, image: c.image, sortOrder: c.sortOrder },
+      update: { name: c.name, description: c.description, image: c.image, sortOrder: c.sortOrder },
     });
   }
   const cats = new Map((await prisma.category.findMany()).map((c) => [c.slug, c.id]));
+
+  const removed = await prisma.product.deleteMany({ where: { slug: { in: LEGACY_SLUGS } } });
+  if (removed.count) console.log(`Removed ${removed.count} old sample products`);
 
   for (const p of products) {
     const photos = images.products[p.slug] ?? [];
@@ -80,9 +89,9 @@ async function main() {
       price: p.price,
       originalPrice: p.mrp,
       shortDescription: p.short,
-      description: `${p.short}\n\nHandcrafted with care in India from premium, cruelty-free vegan leather. Gold-finish hardware, a soft cotton lining and a strap you can adjust to sit exactly where you like.`,
+      description: `${p.short}\n\nHandcrafted with care in India. Gold-tone hardware, a soft lining and a strap you can adjust to sit exactly where you like.`,
       images: photos,
-      features: ["100% cruelty-free vegan leather", "Gold-finish hardware", "Adjustable crossbody strap", "Soft cotton lining", "Handcrafted in India"],
+      features: ["Handcrafted in small batches", "Gold-tone hardware", "Adjustable strap", "Soft cotton lining", "Dust bag included"],
       tags: p.tags,
       material: "Premium vegan leather",
       dimensions: p.dimensions,
@@ -109,9 +118,42 @@ async function main() {
   ];
   for (const c of coupons) await prisma.coupon.upsert({ where: { code: c.code }, create: c, update: {} });
 
-  // Gift box photo (editable later in Admin > Settings)
-  if (images.giftBox) {
-    await prisma.setting.upsert({ where: { key: "giftBoxImage" }, create: { key: "giftBoxImage", value: images.giftBox }, update: { value: images.giftBox } });
+  // Homepage banners: only created when there are none, so edits made in Admin > Banners are never overwritten.
+  if ((await prisma.banner.count()) === 0) {
+    await prisma.banner.createMany({
+      data: [
+        {
+          eyebrow: "New season collection",
+          title: "Carry elegance in *every stride*",
+          subtitle: "Handcrafted sling and crossbody bags with soft, structured shapes and gold-tone hardware.",
+          ctaText: "Shop the collection", ctaHref: "/shop", cta2Text: "Under ₹999", cta2Href: "/shop?max=999",
+          image: images.site["banner-new-season"], focus: "center 35%", theme: "light", sortOrder: 1,
+        },
+        {
+          eyebrow: "Gifting",
+          title: "Wrapped with *love*",
+          subtitle: "Add a gift box and a handwritten note to any bag. One tap at checkout.",
+          ctaText: "Explore gifting", ctaHref: "/gifting",
+          image: images.site["banner-gifting"], focus: "center", theme: "dark", sortOrder: 2,
+        },
+        {
+          eyebrow: "Bestsellers",
+          title: "The bags everyone *keeps asking for*",
+          subtitle: "Quilted, chain-strapped and crossbody. Our most loved styles, back in stock.",
+          ctaText: "Shop bestsellers", ctaHref: "/shop?sort=popular",
+          image: images.site["banner-collection"], focus: "center 45%", theme: "light", sortOrder: 3,
+        },
+      ],
+    });
+  }
+
+  // Site photos. Replace an empty value or the old illustrated placeholder; keep anything the owner chose.
+  for (const [key, url] of [["giftBoxImage", images.site["gift-box"]], ["storyImage", images.site["story"]]] as const) {
+    if (!url) continue;
+    const row = await prisma.setting.findUnique({ where: { key } });
+    if (!row || !row.value || row.value.includes("chique-bags/seed/")) {
+      await prisma.setting.upsert({ where: { key }, create: { key, value: url }, update: { value: url } });
+    }
   }
 
   console.log(`Seed complete. Admin: ${adminEmail}. ${products.length} products.`);

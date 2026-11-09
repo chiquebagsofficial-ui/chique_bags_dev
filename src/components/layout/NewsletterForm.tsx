@@ -23,9 +23,9 @@ export default function NewsletterForm() {
   }
 
   return (
-    <form onSubmit={submit} className="flex overflow-hidden rounded-full border border-white/20 bg-white/5 focus-within:border-rose-soft">
-      <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your email address" aria-label="Email address" className="min-w-0 flex-1 bg-transparent px-5 py-3 text-sm text-white outline-none placeholder:text-white/40" />
-      <button disabled={busy} className="bg-rose-soft px-6 text-xs font-bold uppercase tracking-wider text-ink transition hover:bg-white disabled:opacity-60">Join</button>
+    <form onSubmit={submit} className="mx-auto flex w-full max-w-lg border-b border-ink focus-within:border-berry">
+      <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your email address" aria-label="Email address" className="min-w-0 flex-1 bg-transparent py-3.5 text-[0.95rem] outline-none placeholder:text-muted/70" />
+      <button disabled={busy} className="px-2 text-[0.7rem] font-medium uppercase tracking-[0.22em] transition hover:text-berry disabled:opacity-60">Subscribe</button>
     </form>
   );
 }

@@ -193,7 +193,7 @@ export default function Providers({ user, children }: { user: ClientUser; childr
                 toast ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
               }`}
             >
-              <div className="flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-medium text-white shadow-xl">
+              <div className="flex items-center gap-2 rounded-none bg-ink px-5 py-3 text-sm font-medium text-white shadow-xl">
                 <Check size={16} className="text-rose-soft" />
                 {toast}
               </div>

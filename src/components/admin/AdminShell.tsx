@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, LogOut, Mail, Menu, Package, Settings, ShoppingCart, Tag, Tags, Users, X } from "lucide-react";
+import { Images, LayoutDashboard, LogOut, Mail, Menu, Package, Settings, ShoppingCart, Tag, Tags, Users, X } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/admin/banners", label: "Banners", icon: Images },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: Tags },
   { href: "/admin/customers", label: "Customers", icon: Users },
@@ -26,7 +27,7 @@ export default function AdminShell({ adminName, unreadMessages, children }: { ad
       {NAV.map(({ href, label, icon: Icon }) => {
         const active = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
         return (
-          <Link key={href} href={href} onClick={() => setOpen(false)} className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition ${active ? "bg-white/12 text-white" : "text-white/60 hover:bg-white/8 hover:text-white"}`}>
+          <Link key={href} href={href} onClick={() => setOpen(false)} className={`flex items-center gap-3 rounded-sm px-4 py-2.5 text-sm font-medium transition ${active ? "bg-white/12 text-white" : "text-white/60 hover:bg-white/8 hover:text-white"}`}>
             <Icon size={18} /> {label}
             {label === "Messages" && unreadMessages > 0 && <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-rose px-1.5 text-[0.65rem] font-bold text-white">{unreadMessages}</span>}
           </Link>
@@ -39,7 +40,7 @@ export default function AdminShell({ adminName, unreadMessages, children }: { ad
     <div className="border-t border-white/10 p-4">
       <p className="mb-2 truncate px-2 text-xs text-white/50">{adminName}</p>
       <button
-        className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white"
+        className="flex w-full items-center gap-3 rounded-sm px-4 py-2.5 text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white"
         onClick={async () => {
           await fetch("/api/admin/logout", { method: "POST" });
           router.push("/admin/login");

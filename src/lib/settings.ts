@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS = {
   giftBoxEnabled: "true",
   giftBoxFee: "149",
   giftBoxImage: "",
+  storyImage: "",
   contactEmail: "hello@chiquebags.in",
   contactPhone: "",
   whatsapp: "",
@@ -28,6 +29,7 @@ export type Settings = {
   giftBoxEnabled: boolean;
   giftBoxFee: number;
   giftBoxImage: string;
+  storyImage: string;
   contactEmail: string;
   contactPhone: string;
   whatsapp: string;
@@ -49,6 +51,7 @@ export const getSettings = cache(async (): Promise<Settings> => {
     giftBoxEnabled: raw.giftBoxEnabled === "true",
     giftBoxFee: Number(raw.giftBoxFee) || 0,
     giftBoxImage: raw.giftBoxImage,
+    storyImage: raw.storyImage,
     contactEmail: raw.contactEmail,
     contactPhone: raw.contactPhone,
     whatsapp: raw.whatsapp,

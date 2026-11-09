@@ -2,12 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getCards } from "@/lib/catalog";
+import { getSettings } from "@/lib/settings";
 
 export const metadata: Metadata = { title: "About us", description: "The story behind Chique Bags: handcrafted, cruelty-free bags made in India." };
 export const dynamic = "force-dynamic";
 
 export default async function AboutPage() {
-  const [pick] = await getCards({ isFeatured: true }, 1);
+  const [[pick], settings] = await Promise.all([getCards({ isFeatured: true }, 1), getSettings()]);
+  const photo = settings.storyImage || pick?.image;
   return (
     <>
       <section className="bg-blush">
@@ -17,7 +19,7 @@ export default async function AboutPage() {
             <h1 className="h-display mt-3 text-4xl sm:text-6xl">Bags that feel as good as they look</h1>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted">Chique Bags started as a small Instagram page with one belief: an everyday bag should feel special, without a luxury price tag.</p>
           </div>
-          {pick?.image && <div className="relative mx-auto aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2rem]"><Image src={pick.image} alt="A Chique Bags sling" fill sizes="448px" className="object-cover" /></div>}
+          {photo && <div className="relative mx-auto aspect-[4/5] w-full max-w-md overflow-hidden"><Image src={photo} alt="A Chique Bags bag" fill sizes="448px" className="object-cover" /></div>}
         </div>
       </section>
 

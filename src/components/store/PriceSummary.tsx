@@ -13,7 +13,7 @@ export default function PriceSummary({ p }: { p: Pricing }) {
       {p.giftFee > 0 && <div className={row}><dt className="text-muted">Gift box &amp; note</dt><dd>{formatINR(p.giftFee)}</dd></div>}
       {p.codFee > 0 && <div className={row}><dt className="text-muted">Cash on delivery fee</dt><dd>{formatINR(p.codFee)}</dd></div>}
       <div className="flex justify-between border-t border-line pt-3 text-lg font-semibold"><dt>Total</dt><dd>{formatINR(p.total)}</dd></div>
-      {saved > 0 && <p className="rounded-xl bg-blush px-3 py-2 text-center text-xs font-semibold text-berry">You're saving {formatINR(saved)} on this order</p>}
+      {saved > 0 && <p className="rounded-sm bg-blush px-3 py-2 text-center text-xs font-semibold text-berry">You're saving {formatINR(saved)} on this order</p>}
     </dl>
   );
 }

@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
         </div>
         <div><label className="label" htmlFor="a-email">Email</label><input id="a-email" type="email" required autoComplete="username" className="input" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
         <div><label className="label" htmlFor="a-pass">Password</label><input id="a-pass" type="password" required autoComplete="current-password" className="input" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
-        {error && <p role="alert" className="rounded-xl bg-blush p-3 text-sm font-medium text-berry">{error}</p>}
+        {error && <p role="alert" className="rounded-sm bg-blush p-3 text-sm font-medium text-berry">{error}</p>}
         <button className="btn btn-dark btn-block" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
       </form>
     </div>

@@ -100,7 +100,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <div className="mt-5 flex flex-wrap items-baseline gap-x-3">
             <span className="text-3xl font-semibold">{formatINR(product.price)}</span>
             {mrp && <span className="text-lg text-muted line-through">{formatINR(mrp)}</span>}
-            {off > 0 && <span className="rounded-full bg-blush px-3 py-1 text-xs font-bold text-berry">Save {formatINR((mrp ?? 0) - product.price)} · {off}% off</span>}
+            {off > 0 && <span className="bg-blush px-3 py-1 text-xs font-medium tracking-wide text-berry">Save {formatINR((mrp ?? 0) - product.price)} · {off}% off</span>}
           </div>
           <p className="mt-1 text-xs text-muted">Inclusive of all taxes</p>
           {product.shortDescription && <p className="mt-5 leading-relaxed text-muted">{product.shortDescription}</p>}
@@ -112,7 +112,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             />
           </div>
 
-          <ul className="mt-8 grid gap-3 rounded-2xl bg-cream p-5 text-sm">
+          <ul className="mt-8 grid gap-3 rounded-sm bg-cream p-5 text-sm">
             <li className="flex items-center gap-3"><Truck size={18} className="text-rose" /> Delivered in 3–5 days · Free above {formatINR(settings.freeShippingThreshold)}</li>
             <li className="flex items-center gap-3"><RotateCcw size={18} className="text-rose" /> 7-day exchange for wrong or defective items</li>
             {settings.giftBoxEnabled && <li className="flex items-center gap-3"><Gift size={18} className="text-rose" /> <span>Make it a gift: add a gift box &amp; note at checkout{settings.giftBoxFee > 0 ? ` (${formatINR(settings.giftBoxFee)})` : ""} · <Link href="/gifting" className="underline">Learn more</Link></span></li>}

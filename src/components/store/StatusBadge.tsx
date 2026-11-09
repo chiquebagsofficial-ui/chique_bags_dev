@@ -10,7 +10,7 @@ const STYLES: Record<string, string> = {
 };
 
 export default function StatusBadge({ status }: { status: string }) {
-  return <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${STYLES[status] ?? "bg-stone-100"}`}>{ORDER_STATUS_LABEL[status] ?? status}</span>;
+  return <span className={`inline-block rounded-none px-3 py-1 text-xs font-semibold ${STYLES[status] ?? "bg-stone-100"}`}>{ORDER_STATUS_LABEL[status] ?? status}</span>;
 }
 
 const STEPS = ["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"] as const;

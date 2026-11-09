@@ -25,7 +25,7 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
   );
 }
 
-const Err = ({ msg }: { msg: string | null }) => (msg ? <p role="alert" className="rounded-xl bg-blush p-3 text-sm font-medium text-berry">{msg}</p> : null);
+const Err = ({ msg }: { msg: string | null }) => (msg ? <p role="alert" className="rounded-sm bg-blush p-3 text-sm font-medium text-berry">{msg}</p> : null);
 
 export function LoginForm({ next }: { next?: string }) {
   const router = useRouter();

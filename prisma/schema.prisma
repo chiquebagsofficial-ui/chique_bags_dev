@@ -332,3 +332,24 @@ model Subscriber {
 
   @@map("subscribers")
 }
+
+// Homepage hero banners, managed in Admin > Banners.
+model Banner {
+  id          String   @id @default(cuid())
+  eyebrow     String?
+  title       String // wrap a word in *asterisks* to set it in italics
+  subtitle    String?
+  ctaText     String?
+  ctaHref     String?
+  cta2Text    String?
+  cta2Href    String?
+  image       String
+  imageMobile String?
+  focus       String   @default("center") // CSS object-position, e.g. "70% 30%"
+  theme       String   @default("light") // "light" = light text on a dark overlay, "dark" = dark text
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@map("banners")
+}

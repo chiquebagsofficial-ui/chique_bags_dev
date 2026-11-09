@@ -55,9 +55,9 @@ export default function ProductBuyBox({ product, variants }: Props) {
                 setVariantId(v.id);
                 setQty(1);
               }}
-              className={cn("relative grid h-11 w-11 place-items-center rounded-full border-2 transition", v.id === variantId ? "border-ink" : "border-transparent hover:border-rose-soft")}
+              className={cn("relative grid h-11 w-11 place-items-center rounded-none border-2 transition", v.id === variantId ? "border-ink" : "border-transparent hover:border-rose-soft")}
             >
-              <span className={cn("h-8 w-8 rounded-full border border-black/10", v.stock === 0 && "opacity-40")} style={{ background: v.hex }} />
+              <span className={cn("h-8 w-8 rounded-none border border-black/10", v.stock === 0 && "opacity-40")} style={{ background: v.hex }} />
               {v.stock === 0 && <span className="absolute h-px w-9 rotate-45 bg-ink/60" />}
             </button>
           ))}
@@ -67,7 +67,7 @@ export default function ProductBuyBox({ product, variants }: Props) {
       </div>
 
       <div className="mt-7 flex items-center gap-2 sm:gap-3">
-        <div className="flex items-center rounded-full border-[1.5px] border-[#e7e0dc]">
+        <div className="flex items-center rounded-none border-[1.5px] border-[#e7e0dc]">
           <button type="button" className="grid h-12 w-9 place-items-center sm:w-11 disabled:opacity-40" aria-label="Decrease quantity" disabled={qty <= 1} onClick={() => setQty(qty - 1)}><Minus size={16} /></button>
           <span className="w-7 text-center font-semibold sm:w-8" aria-live="polite">{qty}</span>
           <button type="button" className="grid h-12 w-9 place-items-center sm:w-11 disabled:opacity-40" aria-label="Increase quantity" disabled={qty >= maxQty} onClick={() => setQty(qty + 1)}><Plus size={16} /></button>
@@ -88,7 +88,7 @@ export default function ProductBuyBox({ product, variants }: Props) {
           onClick={() => wish.toggle(product.id)}
           aria-pressed={saved}
           aria-label={saved ? "Remove from favourites" : "Save to favourites"}
-          className="grid h-[50px] w-[46px] shrink-0 sm:w-[50px] place-items-center rounded-full border-[1.5px] border-[#e7e0dc] transition hover:border-rose"
+          className="grid h-[50px] w-[46px] shrink-0 sm:w-[50px] place-items-center rounded-none border-[1.5px] border-[#e7e0dc] transition hover:border-rose"
         >
           <Heart size={19} className={cn(saved ? "fill-rose text-rose" : "")} />
         </button>

@@ -45,7 +45,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           <ul className="divide-y divide-line">
             {order.items.map((i) => (
               <li key={i.id} className="flex gap-4 py-4 first:pt-0 last:pb-0">
-                <span className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-cream">{i.image && <Image src={i.image} alt="" fill sizes="80px" className="object-cover" />}</span>
+                <span className="relative h-24 w-20 shrink-0 overflow-hidden rounded-sm bg-cream">{i.image && <Image src={i.image} alt="" fill sizes="80px" className="object-cover" />}</span>
                 <div className="flex-1 text-sm">
                   {i.product ? <Link href={`/products/${i.product.slug}`} className="font-medium hover:text-rose">{i.name}</Link> : <span className="font-medium">{i.name}</span>}
                   <p className="text-muted">{i.variantName} × {i.quantity}</p>

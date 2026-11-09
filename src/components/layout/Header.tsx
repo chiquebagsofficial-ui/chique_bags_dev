@@ -19,11 +19,20 @@ export default function Header({ categories, announcement }: { categories: Cat[]
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     setMenuOpen(false);
     setSearchOpen(false);
+    setShopOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen || searchOpen ? "hidden" : "";
@@ -33,62 +42,68 @@ export default function Header({ categories, announcement }: { categories: Cat[]
   }, [menuOpen, searchOpen]);
 
   const active = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+  const iconBtn = "relative grid h-10 w-10 place-items-center transition hover:text-berry";
 
   return (
     <>
       {announcement && (
-        <div className="announce bg-ink px-4 py-2.5 text-center text-[0.74rem] font-medium tracking-wide text-white/90">{announcement}</div>
+        <div className="announce bg-ink px-4 py-2.5 text-center text-[0.66rem] font-medium uppercase tracking-[0.28em] text-white/85">{announcement}</div>
       )}
-      <header className="sticky top-0 z-[100] border-b border-line bg-white/95 backdrop-blur">
-        <div className="wrap flex h-[68px] items-center justify-between gap-6 lg:h-[76px]">
-          <button className="-ml-2 p-2 lg:hidden" aria-label="Open menu" onClick={() => setMenuOpen(true)}>
-            <Menu size={22} />
-          </button>
+      <header className={`sticky top-0 z-[100] bg-white/95 backdrop-blur transition-shadow ${scrolled ? "shadow-[0_1px_0_0_var(--color-line)]" : "border-b border-line"}`}>
+        <div className="wrap grid h-[64px] grid-cols-[1fr_auto_1fr] items-center lg:h-[84px]">
+          {/* left */}
+          <div className="flex items-center">
+            <button className="-ml-2 p-2 lg:hidden" aria-label="Open menu" onClick={() => setMenuOpen(true)}>
+              <Menu size={22} strokeWidth={1.5} />
+            </button>
+            <nav className="hidden items-center gap-9 lg:flex" aria-label="Main">
+              <div className="relative" onMouseEnter={() => setShopOpen(true)} onMouseLeave={() => setShopOpen(false)}>
+                <Link href="/shop" className="nav-link inline-flex items-center gap-1.5" data-active={active("/shop") || active("/products")}>
+                  Shop <ChevronDown size={11} />
+                </Link>
+                {shopOpen && (
+                  <div className="absolute left-0 top-full w-64 pt-4">
+                    <div className="fade-up border border-line bg-white py-3 shadow-[0_24px_50px_-30px_rgba(0,0,0,0.35)]">
+                      {[
+                        ["/shop", "All bags"],
+                        ["/shop?sort=popular", "Bestsellers"],
+                        ["/shop?sort=newest", "New arrivals"],
+                        ...categories.map((c) => [`/shop?category=${c.slug}`, c.name]),
+                        ["/shop?max=999", `Under ${formatINR(999)}`],
+                      ].map(([href, label]) => (
+                        <Link key={href} href={href} className="block px-6 py-2.5 text-[0.8rem] tracking-wide transition hover:bg-blush hover:text-berry">{label}</Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <Link href="/gifting" className="nav-link" data-active={active("/gifting")}>Gifting</Link>
+              <Link href="/about" className="nav-link" data-active={active("/about")}>Our story</Link>
+            </nav>
+          </div>
 
-          <Link href="/" className="font-serif text-[1.55rem] font-semibold tracking-wide max-lg:absolute max-lg:left-1/2 max-lg:-translate-x-1/2">
-            Chique Bags
+          {/* centre: wordmark */}
+          <Link href="/" className="text-center" aria-label="Chique Bags home">
+            <span className="font-serif text-[1.7rem] font-medium uppercase leading-none tracking-[0.32em] sm:text-[1.95rem]">Chique</span>
+            <span className="mt-1 block text-[0.52rem] font-medium uppercase tracking-[0.62em] text-gold">Bags</span>
           </Link>
 
-          <nav className="hidden items-center gap-9 lg:flex" aria-label="Main">
-            <Link href="/" className="nav-link" data-active={active("/")}>Home</Link>
-            <div className="relative" onMouseEnter={() => setShopOpen(true)} onMouseLeave={() => setShopOpen(false)}>
-              <Link href="/shop" className="nav-link inline-flex items-center gap-1" data-active={active("/shop") || active("/products")}>
-                Shop <ChevronDown size={12} />
-              </Link>
-              {shopOpen && (
-                <div className="absolute left-1/2 top-full w-60 -translate-x-1/2 pt-3">
-                  <div className="fade-up rounded-2xl border border-line bg-white p-2 shadow-xl">
-                    <Link href="/shop" className="block rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-blush hover:text-rose">All bags</Link>
-                    <Link href="/shop?sort=popular" className="block rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-blush hover:text-rose">Bestsellers</Link>
-                    {categories.map((c) => (
-                      <Link key={c.id} href={`/shop?category=${c.slug}`} className="block rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-blush hover:text-rose">
-                        {c.name}
-                      </Link>
-                    ))}
-                    <Link href="/shop?max=999" className="block rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-blush hover:text-rose">Under {formatINR(999)}</Link>
-                  </div>
-                </div>
-              )}
-            </div>
-            <Link href="/gifting" className="nav-link" data-active={active("/gifting")}>Gifting</Link>
-            <Link href="/about" className="nav-link" data-active={active("/about")}>About</Link>
-            <Link href="/contact" className="nav-link" data-active={active("/contact")}>Contact</Link>
-          </nav>
-
-          <div className="flex items-center gap-1">
-            <button className="grid h-10 w-10 place-items-center rounded-full hover:bg-blush" aria-label="Search" onClick={() => setSearchOpen(true)}>
-              <Search size={20} />
+          {/* right */}
+          <div className="flex items-center justify-end gap-0.5">
+            <Link href="/contact" className="nav-link mr-5 hidden lg:inline-block" data-active={active("/contact")}>Contact</Link>
+            <button className={iconBtn} aria-label="Search" onClick={() => setSearchOpen(true)}>
+              <Search size={20} strokeWidth={1.5} />
             </button>
-            <Link href="/wishlist" className="relative hidden h-10 w-10 place-items-center rounded-full hover:bg-blush sm:grid" aria-label="Favourites">
-              <Heart size={20} />
-              {wish.ids.length > 0 && <span className="absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-rose px-1 text-[0.62rem] font-bold text-white">{wish.ids.length}</span>}
+            <Link href="/wishlist" className={`${iconBtn} hidden sm:grid`} aria-label="Favourites">
+              <Heart size={20} strokeWidth={1.5} />
+              {wish.ids.length > 0 && <span className="absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-berry px-1 text-[0.58rem] font-medium text-white">{wish.ids.length}</span>}
             </Link>
-            <Link href={user ? "/account" : "/login"} className="hidden h-10 w-10 place-items-center rounded-full hover:bg-blush sm:grid" aria-label={user ? "Your account" : "Log in"}>
-              <User size={20} />
+            <Link href={user ? "/account" : "/login"} className={`${iconBtn} hidden sm:grid`} aria-label={user ? "Your account" : "Log in"}>
+              <User size={20} strokeWidth={1.5} />
             </Link>
-            <button className="relative grid h-10 w-10 place-items-center rounded-full hover:bg-blush" aria-label={`Open bag, ${cart.count} items`} onClick={() => cart.setDrawerOpen(true)}>
-              <ShoppingBag size={20} />
-              {cart.count > 0 && <span className="absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-ink px-1 text-[0.62rem] font-bold text-white">{cart.count}</span>}
+            <button className={iconBtn} aria-label={`Open bag, ${cart.count} items`} onClick={() => cart.setDrawerOpen(true)}>
+              <ShoppingBag size={20} strokeWidth={1.5} />
+              {cart.count > 0 && <span className="absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-ink px-1 text-[0.58rem] font-medium text-white">{cart.count}</span>}
             </button>
           </div>
         </div>
@@ -97,29 +112,29 @@ export default function Header({ categories, announcement }: { categories: Cat[]
       {/* Mobile menu */}
       <div className={`fixed inset-0 z-[200] lg:hidden ${menuOpen ? "" : "pointer-events-none"}`} aria-hidden={!menuOpen}>
         <div className={`absolute inset-0 bg-black/40 transition-opacity ${menuOpen ? "opacity-100" : "opacity-0"}`} onClick={() => setMenuOpen(false)} />
-        <aside className={`absolute inset-y-0 left-0 flex w-[84%] max-w-sm flex-col bg-white transition-transform duration-300 ${menuOpen ? "translate-x-0" : "-translate-x-full"}`}>
-          <div className="flex h-[68px] items-center justify-between border-b border-line px-5">
-            <span className="font-serif text-xl font-semibold">Chique Bags</span>
-            <button aria-label="Close menu" onClick={() => setMenuOpen(false)}><X size={22} /></button>
+        <aside className={`absolute inset-y-0 left-0 flex w-[86%] max-w-sm flex-col bg-white transition-transform duration-300 ${menuOpen ? "translate-x-0" : "-translate-x-full"}`}>
+          <div className="flex h-[64px] items-center justify-between border-b border-line px-6">
+            <span className="font-serif text-xl uppercase tracking-[0.3em]">Chique</span>
+            <button aria-label="Close menu" onClick={() => setMenuOpen(false)}><X size={22} strokeWidth={1.5} /></button>
           </div>
-          <nav className="flex-1 overflow-y-auto p-5 text-lg">
+          <nav className="flex-1 overflow-y-auto px-6 py-4">
             {[
-              ["/", "Home"],
-              ["/shop", "Shop all"],
-              ...categories.map((c) => [`/shop?category=${c.slug}`, c.name]),
-              ["/shop?sort=popular", "Bestsellers"],
-              ["/gifting", "Gifting"],
-              ["/wishlist", "Favourites"],
-              ["/about", "About us"],
-              ["/contact", "Contact"],
-              ["/track", "Track an order"],
-            ].map(([href, label], i) => (
-              <Link key={href + label} href={href} className={`block border-b border-line py-3.5 ${i >= 2 && i < 2 + categories.length ? "pl-4 text-base text-muted" : "font-medium"}`}>
+              ["/", "Home", false],
+              ["/shop", "Shop all", false],
+              ...categories.map((c) => [`/shop?category=${c.slug}`, c.name, true] as const),
+              ["/shop?sort=popular", "Bestsellers", false],
+              ["/gifting", "Gifting", false],
+              ["/about", "Our story", false],
+              ["/wishlist", "Favourites", false],
+              ["/contact", "Contact", false],
+              ["/track", "Track an order", false],
+            ].map(([href, label, sub]) => (
+              <Link key={String(href) + label} href={String(href)} className={`block border-b border-line py-4 ${sub ? "pl-5 text-[0.95rem] text-muted" : "font-serif text-[1.35rem]"}`}>
                 {label}
               </Link>
             ))}
           </nav>
-          <div className="border-t border-line p-5">
+          <div className="border-t border-line p-6">
             <Link href={user ? "/account" : "/login"} className="btn btn-dark btn-block">{user ? `Hi, ${user.name.split(" ")[0]}` : "Log in / Sign up"}</Link>
           </div>
         </aside>
@@ -162,38 +177,40 @@ function SearchOverlay({ onClose, onSubmit }: { onClose: () => void; onSubmit: (
 
   return (
     <div className="fixed inset-0 z-[250] bg-black/40" onClick={onClose}>
-      <div className="fade-up mx-auto mt-0 max-w-2xl rounded-b-3xl bg-white p-5 shadow-2xl sm:mt-16 sm:rounded-3xl" onClick={(e) => e.stopPropagation()}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (q.trim()) onSubmit(q.trim());
-          }}
-          className="flex items-center gap-3 border-b border-line pb-4"
-        >
-          <Search size={20} className="text-muted" />
-          <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search crescent, quilted, chain, black…" className="flex-1 text-base outline-none" aria-label="Search products" />
-          <button type="button" onClick={onClose} aria-label="Close search"><X size={20} /></button>
-        </form>
-        {results.length > 0 ? (
-          <ul className="mt-3 max-h-[50vh] overflow-y-auto">
-            {results.map((r) => (
-              <li key={r.slug}>
-                <Link href={`/products/${r.slug}`} className="flex items-center gap-4 rounded-xl p-2 hover:bg-blush">
-                  <span className="relative h-14 w-12 overflow-hidden rounded-lg bg-cream">{r.image && <Image src={r.image} alt="" fill sizes="48px" className="object-cover" />}</span>
-                  <span className="flex-1 text-sm font-medium">{r.name}</span>
-                  <span className="text-sm font-semibold">{formatINR(r.price)}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-            <span className="text-muted">Popular:</span>
-            {["Crescent", "Quilted", "Chain", "Black", "Under 999"].map((t) => (
-              <button key={t} type="button" className="chip" onClick={() => onSubmit(t === "Under 999" ? "under999" : t)}>{t}</button>
-            ))}
-          </div>
-        )}
+      <div className="fade-up bg-white" onClick={(e) => e.stopPropagation()}>
+        <div className="wrap max-w-3xl py-6">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (q.trim()) onSubmit(q.trim());
+            }}
+            className="flex items-center gap-4 border-b border-ink pb-4"
+          >
+            <Search size={20} strokeWidth={1.5} className="text-muted" />
+            <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search bags, colours, styles" className="flex-1 font-serif text-2xl outline-none placeholder:text-muted/60" aria-label="Search products" />
+            <button type="button" onClick={onClose} aria-label="Close search"><X size={22} strokeWidth={1.5} /></button>
+          </form>
+          {results.length > 0 ? (
+            <ul className="mt-4 max-h-[50vh] overflow-y-auto">
+              {results.map((r) => (
+                <li key={r.slug}>
+                  <Link href={`/products/${r.slug}`} className="flex items-center gap-4 p-2 hover:bg-blush">
+                    <span className="relative h-16 w-12 bg-cream">{r.image && <Image src={r.image} alt="" fill sizes="48px" className="object-cover" />}</span>
+                    <span className="flex-1 font-serif text-lg">{r.name}</span>
+                    <span className="text-sm">{formatINR(r.price)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="mt-5 flex flex-wrap items-center gap-2 pb-2">
+              <span className="mr-1 text-xs uppercase tracking-[0.2em] text-muted">Popular</span>
+              {["Crescent", "Quilted", "Chain", "Black", "Under 999"].map((t) => (
+                <button key={t} type="button" className="chip" onClick={() => onSubmit(t === "Under 999" ? "under999" : t)}>{t}</button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

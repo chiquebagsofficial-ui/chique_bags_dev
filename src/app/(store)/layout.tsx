@@ -11,7 +11,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const [user, settings, categories] = await Promise.all([getSessionUser(), getSettings(), getNavCategories()]);
   return (
     <Providers user={user}>
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[999] focus:rounded-full focus:bg-white focus:px-4 focus:py-2">Skip to content</a>
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[999] focus:rounded-none focus:bg-white focus:px-4 focus:py-2">Skip to content</a>
       <Header categories={categories} announcement={settings.announcement} />
       <main id="main">{children}</main>
       <Footer settings={settings} categories={categories} />

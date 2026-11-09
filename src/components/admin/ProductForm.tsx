@@ -115,7 +115,7 @@ export default function ProductForm({ initial, categories }: { initial: ProductF
   const sec = "card space-y-4 p-6";
   return (
     <form onSubmit={submit} className="grid max-w-5xl gap-6 lg:grid-cols-[1.6fr_1fr]">
-      {error && <p role="alert" className="rounded-xl bg-blush p-4 text-sm font-medium text-berry lg:col-span-2">{error}</p>}
+      {error && <p role="alert" className="rounded-sm bg-blush p-4 text-sm font-medium text-berry lg:col-span-2">{error}</p>}
 
       <div className="space-y-6">
         <section className={sec}>
@@ -137,7 +137,7 @@ export default function ProductForm({ initial, categories }: { initial: ProductF
           <p className="text-xs text-muted">The first photo is the cover. Upload from your device or paste an image link.</p>
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
             {v.images.map((src, i) => (
-              <div key={src + i} className="group relative aspect-[4/5] overflow-hidden rounded-xl bg-cream">
+              <div key={src + i} className="group relative aspect-[4/5] overflow-hidden rounded-sm bg-cream">
                 <Image src={src} alt="" fill sizes="140px" className="object-cover" />
                 {i === 0 && <span className="badge badge-dark absolute left-1.5 top-1.5">Cover</span>}
                 <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/50 p-1 opacity-0 transition group-hover:opacity-100">
@@ -146,7 +146,7 @@ export default function ProductForm({ initial, categories }: { initial: ProductF
                 </div>
               </div>
             ))}
-            <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="grid aspect-[4/5] place-items-center rounded-xl border-2 border-dashed border-[#e0d6d0] text-sm text-muted hover:border-rose hover:text-rose">
+            <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="grid aspect-[4/5] place-items-center rounded-sm border-2 border-dashed border-[#e0d6d0] text-sm text-muted hover:border-rose hover:text-rose">
               <span className="flex flex-col items-center gap-1"><ImagePlus size={22} />{uploading ? "Uploading…" : "Upload"}</span>
             </button>
           </div>
@@ -162,7 +162,7 @@ export default function ProductForm({ initial, categories }: { initial: ProductF
           <div className="space-y-3">
             {v.variants.map((x, i) => (
               <div key={x.id ?? i} className="flex flex-wrap items-center gap-3">
-                <input type="color" aria-label="Colour swatch" value={x.hex} onChange={(e) => setV({ ...v, variants: v.variants.map((y, n) => (n === i ? { ...y, hex: e.target.value } : y)) })} className="h-11 w-12 cursor-pointer rounded-lg border border-[#e7e0dc] bg-white p-1" />
+                <input type="color" aria-label="Colour swatch" value={x.hex} onChange={(e) => setV({ ...v, variants: v.variants.map((y, n) => (n === i ? { ...y, hex: e.target.value } : y)) })} className="h-11 w-12 cursor-pointer rounded-sm border border-[#e7e0dc] bg-white p-1" />
                 <input required className="input min-w-0 flex-1" placeholder="Colour name (e.g. Dusty Rose)" aria-label="Colour name" value={x.name} onChange={(e) => setV({ ...v, variants: v.variants.map((y, n) => (n === i ? { ...y, name: e.target.value } : y)) })} />
                 <input type="number" min={0} className="input !w-24" aria-label="Stock" placeholder="Stock" value={x.stock} onChange={(e) => setV({ ...v, variants: v.variants.map((y, n) => (n === i ? { ...y, stock: e.target.value === "" ? "" : Number(e.target.value) } : y)) })} />
                 <button type="button" aria-label="Remove colour" disabled={v.variants.length === 1} className="text-muted hover:text-berry disabled:opacity-30" onClick={() => setV({ ...v, variants: v.variants.filter((_, n) => n !== i) })}><Trash2 size={17} /></button>

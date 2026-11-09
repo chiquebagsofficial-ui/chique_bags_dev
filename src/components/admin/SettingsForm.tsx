@@ -29,6 +29,7 @@ export default function SettingsForm({ initial }: { initial: Settings }) {
     <form onSubmit={save} className="max-w-3xl space-y-6">
       <section className={sec}>
         <h2 className="font-serif text-lg font-semibold sm:col-span-2">Storefront</h2>
+        <div className="sm:col-span-2"><label className="label" htmlFor="s-story">Our story photo link (homepage)</label><input id="s-story" className="input" placeholder="https://…" value={s.storyImage} onChange={str("storyImage")} /></div>
         <div className="sm:col-span-2"><label className="label" htmlFor="s-ann">Announcement bar text (leave empty to hide)</label><input id="s-ann" className="input" value={s.announcement} onChange={str("announcement")} /></div>
       </section>
       <section className={sec}>

@@ -46,7 +46,7 @@ export default async function DashboardPage() {
       <PageHead title="Dashboard" subtitle="How the store is doing" />
 
       {attention.length > 0 && (
-        <div className="mb-6 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
+        <div className="mb-6 rounded-sm border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">
           <p className="flex items-center gap-2 font-semibold"><AlertTriangle size={18} /> {attention.length} order{attention.length > 1 ? "s need" : " needs"} your attention</p>
           <ul className="mt-2 space-y-1">
             {attention.map((o) => <li key={o.id}><Link href={`/admin/orders/${o.id}`} className="font-medium underline">{o.orderNumber}</Link>: {o.notes}</li>)}

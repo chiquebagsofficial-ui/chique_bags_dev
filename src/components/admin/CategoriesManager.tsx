@@ -48,14 +48,14 @@ export default function CategoriesManager({ categories }: { categories: Cat[] })
           <div className="sm:col-span-2"><label className="label" htmlFor="ct-desc">Description</label><input id="ct-desc" className="input" value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></div>
           <div className="sm:col-span-2"><label className="label" htmlFor="ct-img">Cover image link</label><input id="ct-img" type="url" placeholder="https://…" className="input" value={f.image} onChange={(e) => setF({ ...f, image: e.target.value })} /></div>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.isActive} onChange={(e) => setF({ ...f, isActive: e.target.checked })} className="accent-[#1a1a1a]" /> Visible in the store</label>
-          {error && <p role="alert" className="rounded-xl bg-blush p-3 text-sm font-medium text-berry sm:col-span-2">{error}</p>}
+          {error && <p role="alert" className="rounded-sm bg-blush p-3 text-sm font-medium text-berry sm:col-span-2">{error}</p>}
           <div className="flex gap-3 sm:col-span-2"><button className="btn btn-dark btn-sm" disabled={busy}>{busy ? "Saving…" : "Save category"}</button><button type="button" className="btn btn-line btn-sm" onClick={() => setEditing(null)}>Cancel</button></div>
         </form>
       )}
       <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {categories.map((c) => (
           <li key={c.id} className="card flex items-center gap-4 p-4">
-            <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-cream">{c.image && <Image src={c.image} alt="" fill sizes="64px" className="object-cover" />}</span>
+            <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-sm bg-cream">{c.image && <Image src={c.image} alt="" fill sizes="64px" className="object-cover" />}</span>
             <div className="min-w-0 flex-1 text-sm"><p className="truncate font-semibold">{c.name} {!c.isActive && <span className="badge ml-1 !bg-stone-200">Hidden</span>}</p><p className="text-muted">{c.productCount} product{c.productCount === 1 ? "" : "s"}</p></div>
             <button aria-label="Edit category" className="grid h-9 w-9 place-items-center rounded-full hover:bg-blush" onClick={() => open(c)}><Pencil size={16} /></button>
             <button aria-label="Delete category" className="grid h-9 w-9 place-items-center rounded-full hover:bg-blush hover:text-berry" onClick={async () => {

@@ -37,7 +37,7 @@ export default function TrackForm() {
       <form onSubmit={submit} className="card mt-8 space-y-4 p-6">
         <div><label className="label" htmlFor="t-num">Order number</label><input id="t-num" required placeholder="CB-26-00001" className="input uppercase" value={orderNumber} onChange={(e) => setOrderNumber(e.target.value)} /></div>
         <div><label className="label" htmlFor="t-email">Email</label><input id="t-email" type="email" required className="input" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-        {error && <p role="alert" className="rounded-xl bg-blush p-3 text-sm font-medium text-berry">{error}</p>}
+        {error && <p role="alert" className="rounded-sm bg-blush p-3 text-sm font-medium text-berry">{error}</p>}
         <button className="btn btn-dark" disabled={busy}>{busy ? "Looking…" : "Track order"}</button>
       </form>
 

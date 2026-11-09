@@ -63,14 +63,14 @@ export default function CartDrawer({ freeShippingThreshold }: { freeShippingThre
             <ul className="divide-y divide-line">
               {cart.items.map((i) => (
                 <li key={i.variantId} className="flex gap-4 py-5">
-                  <Link href={`/products/${i.slug}`} onClick={() => cart.setDrawerOpen(false)} className="relative h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-cream">
+                  <Link href={`/products/${i.slug}`} onClick={() => cart.setDrawerOpen(false)} className="relative h-24 w-20 shrink-0 overflow-hidden rounded-sm bg-cream">
                     {i.image && <Image src={i.image} alt={i.name} fill sizes="80px" className="object-cover" />}
                   </Link>
                   <div className="flex min-w-0 flex-1 flex-col">
                     <Link href={`/products/${i.slug}`} onClick={() => cart.setDrawerOpen(false)} className="line-clamp-2 text-sm font-medium leading-snug">{i.name}</Link>
                     <p className="mt-0.5 text-xs text-muted">{i.variantName}</p>
                     <div className="mt-auto flex items-center justify-between pt-2">
-                      <div className="flex items-center rounded-full border border-[#e7e0dc]">
+                      <div className="flex items-center rounded-none border border-[#e7e0dc]">
                         <button className="grid h-8 w-8 place-items-center" aria-label="Decrease quantity" onClick={() => (i.quantity > 1 ? cart.setQty(i.variantId, i.quantity - 1) : cart.remove(i.variantId))}><Minus size={14} /></button>
                         <span className="w-6 text-center text-sm font-semibold">{i.quantity}</span>
                         <button className="grid h-8 w-8 place-items-center" aria-label="Increase quantity" onClick={() => cart.setQty(i.variantId, i.quantity + 1)}><Plus size={14} /></button>

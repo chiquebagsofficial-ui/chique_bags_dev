@@ -47,7 +47,7 @@ export function ProfileForm({ user, hasPassword }: { user: { name: string; email
           <div><label className="label" htmlFor="p-new">New password</label><input id="p-new" type="password" minLength={8} autoComplete="new-password" className="input" value={next} onChange={(e) => setNext(e.target.value)} /></div>
         </div>
       </div>
-      {error && <p role="alert" className="rounded-xl bg-blush p-3 text-sm font-medium text-berry">{error}</p>}
+      {error && <p role="alert" className="rounded-sm bg-blush p-3 text-sm font-medium text-berry">{error}</p>}
       <button className="btn btn-dark btn-sm" disabled={busy}>{busy ? "Saving…" : "Save changes"}</button>
     </form>
   );
@@ -105,7 +105,7 @@ export function AddressManager({ addresses }: { addresses: Addr[] }) {
       {addresses.length === 0 && editing === null && <p className="text-sm text-muted">No saved addresses yet.</p>}
       <ul className="space-y-3">
         {addresses.map((a) => (
-          <li key={a.id} className="flex items-start justify-between gap-4 rounded-xl border border-line p-4 text-sm">
+          <li key={a.id} className="flex items-start justify-between gap-4 rounded-sm border border-line p-4 text-sm">
             <div>
               <p className="font-semibold">{a.name} <span className="font-normal text-muted">· {a.phone}</span> {a.isDefault && <span className="badge badge-rose ml-1">Default</span>}</p>
               <p className="mt-1 text-muted">{a.line1}{a.line2 && `, ${a.line2}`}, {a.city}, {a.state} {a.pincode}</p>
@@ -128,7 +128,7 @@ export function AddressManager({ addresses }: { addresses: Addr[] }) {
           <div><label className="label" htmlFor="ad-city">City</label><input id="ad-city" required className="input" value={form.city} onChange={set("city")} /></div>
           <div><label className="label" htmlFor="ad-state">State</label><input id="ad-state" required className="input" value={form.state} onChange={set("state")} /></div>
           <div><label className="label" htmlFor="ad-pin">Pincode</label><input id="ad-pin" required inputMode="numeric" maxLength={6} className="input" value={form.pincode} onChange={set("pincode")} /></div>
-          {error && <p role="alert" className="rounded-xl bg-blush p-3 text-sm font-medium text-berry sm:col-span-2">{error}</p>}
+          {error && <p role="alert" className="rounded-sm bg-blush p-3 text-sm font-medium text-berry sm:col-span-2">{error}</p>}
           <div className="flex gap-3 sm:col-span-2">
             <button className="btn btn-dark btn-sm" disabled={busy}>{busy ? "Saving…" : "Save address"}</button>
             <button type="button" className="btn btn-line btn-sm" onClick={() => setEditing(null)}>Cancel</button>
