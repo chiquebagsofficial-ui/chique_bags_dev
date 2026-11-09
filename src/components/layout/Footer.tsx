@@ -18,7 +18,7 @@ export default function Footer({ settings, categories }: { settings: Settings; c
         </div>
       </section>
 
-      <div className="bg-ink pb-24 text-white lg:pb-0">
+      <div className="bg-ink text-white">
         <div className="wrap grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.2fr]">
           <div>
             <p className="font-serif text-3xl font-medium uppercase tracking-[0.3em]">Chique</p>

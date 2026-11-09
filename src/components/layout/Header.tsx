@@ -129,13 +129,13 @@ export default function Header({ categories, announcement }: { categories: Cat[]
               ["/contact", "Contact", false],
               ["/track", "Track an order", false],
             ].map(([href, label, sub]) => (
-              <Link key={String(href) + label} href={String(href)} className={`block border-b border-line py-4 ${sub ? "pl-5 text-[0.95rem] text-muted" : "font-serif text-[1.35rem]"}`}>
+              <Link key={String(href) + label} href={String(href)} onClick={() => setMenuOpen(false)} className={`block border-b border-line py-4 ${sub ? "pl-5 text-[0.95rem] text-muted" : "font-serif text-[1.35rem]"}`}>
                 {label}
               </Link>
             ))}
           </nav>
           <div className="border-t border-line p-6">
-            <Link href={user ? "/account" : "/login"} className="btn btn-dark btn-block">{user ? `Hi, ${user.name.split(" ")[0]}` : "Log in / Sign up"}</Link>
+            <Link href={user ? "/account" : "/login"} onClick={() => setMenuOpen(false)} className="btn btn-dark btn-block">{user ? `Hi, ${user.name.split(" ")[0]}` : "Log in / Sign up"}</Link>
           </div>
         </aside>
       </div>

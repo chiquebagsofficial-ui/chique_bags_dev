@@ -189,7 +189,7 @@ export default function Providers({ user, children }: { user: ClientUser; childr
             <div
               role="status"
               aria-live="polite"
-              className={`pointer-events-none fixed bottom-24 left-1/2 z-[300] -translate-x-1/2 transition-all duration-300 lg:bottom-8 ${
+              className={`pointer-events-none fixed bottom-8 left-1/2 z-[300] -translate-x-1/2 transition-all duration-300 ${
                 toast ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
               }`}
             >
