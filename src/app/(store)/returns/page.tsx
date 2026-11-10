@@ -13,11 +13,11 @@ export default async function ReturnsPage() {
       updated="November 2026"
       intro="Every bag is checked before it leaves us. If something isn't right, we'll make it right."
       sections={[
-        { heading: "Exchange within 7 days", body: ["You can ask for an exchange within 7 days of delivery if you received the wrong item or a defective item.", "Please record an unboxing video when you open the parcel. We'll need it to process your claim.", "The bag must be unused, with its tags and dust bag."] },
-        { heading: "Not covered", body: "We can't accept exchanges for a change of mind, small colour differences caused by your screen, or damage after delivery." },
-        { heading: "How to start", body: `Email ${s.contactEmail} within 7 days with your order number, photos and the unboxing video. We'll reply within one working day.` },
-        { heading: "Cancellations", body: "You can cancel an order from your account any time before it ships. After shipping, the order can't be cancelled." },
-        { heading: "Refunds", body: "If your order is cancelled or a claim is approved and a replacement isn't possible, we refund the amount to your original payment method within 5–7 working days. Cash-on-delivery refunds are made by bank transfer." },
+        { heading: "When you can report a problem", body: ["Within 7 days of delivery, if your bag arrives damaged, defective, or is not the item you ordered.", "The bag should be unused, with its tags and dust bag.", "We cannot accept returns for a change of mind, or for small colour differences caused by your screen."] },
+        { heading: "How to report it", body: ["Open your order in My account and choose “Report a problem”. Select the item, tell us what went wrong and attach clear photos (required for damaged or defective bags).", "Please keep the packaging and, if you can, record a short unboxing video. We may ask for it.", `You can also write to us at ${s.contactEmail} with your order number.`] },
+        { heading: "What happens next", body: ["We review your request within one working day and email you when it is approved or if we need more information.", "You can follow every step (requested, approved, item received, refunded) on your order page.", "Approved requests are refunded or exchanged, whichever you prefer where stock allows."] },
+        { heading: "Refunds", body: "Refunds go back to the original payment method (UPI, card, net banking or wallet) and usually reach you within 5 to 7 working days of the refund being issued. We email you the amount and a reference when it's done. Every refund is recorded against your order." },
+        { heading: "Cancellations", body: "You can cancel an order from your account any time before it ships, and the full amount is refunded. After shipping, an order can't be cancelled, but you can still report a problem once it arrives." },
       ]}
     />
   );

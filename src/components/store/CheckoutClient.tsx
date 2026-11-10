@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Banknote, CheckCircle2, CreditCard, Gift, Lock } from "lucide-react";
+import { CheckCircle2, CreditCard, Gift, Lock } from "lucide-react";
 import { useCart, useToast } from "@/components/providers";
 import CouponBox from "@/components/store/CouponBox";
 import PriceSummary from "@/components/store/PriceSummary";
@@ -34,20 +34,18 @@ function loadRazorpay(): Promise<boolean> {
 interface Props {
   user: { id: string; name: string; email: string; phone: string | null } | null;
   addresses: Addr[];
-  codEnabled: boolean;
-  codFee: number;
   gift: { enabled: boolean; fee: number; image: string };
   onlineAvailable: boolean;
   simulated: boolean;
 }
 
-export default function CheckoutClient({ user, addresses, codEnabled, codFee, gift, onlineAvailable, simulated }: Props) {
+export default function CheckoutClient({ user, addresses, gift, onlineAvailable, simulated }: Props) {
   const cart = useCart();
   const toast = useToast();
   const router = useRouter();
 
   const [coupon, setCoupon] = useState<string | null>(null);
-  const [method, setMethod] = useState<"ONLINE" | "COD">(onlineAvailable ? "ONLINE" : "COD");
+  const [pinState, setPinState] = useState<"idle" | "checking" | "ok" | "invalid" | "unknown">("idle");
   const [selected, setSelected] = useState<string | "new">(addresses[0]?.id ?? "new");
   const [form, setForm] = useState<Addr>({ ...EMPTY, name: user?.name ?? "", phone: user?.phone ?? "" });
   const [saveAddress, setSaveAddress] = useState(true);
@@ -57,7 +55,7 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
   const [message, setMessage] = useState<string | null>(null);
   const [testPay, setTestPay] = useState<{ orderId: string } | null>(null);
 
-  const { data, error } = usePricing(cart.items, coupon, method, cart.ready, giftBox);
+  const { data, error } = usePricing(cart.items, coupon, cart.ready, giftBox);
 
   // Guest verification state
   const [gName, setGName] = useState("");
@@ -73,6 +71,24 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
   }, [user]);
 
   const set = (k: keyof Addr) => (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  // Check the pincode as soon as six digits are typed, and fill in the city and state.
+  async function onPincode(e: React.ChangeEvent<HTMLInputElement>) {
+    const pin = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setForm((f) => ({ ...f, pincode: pin }));
+    if (pin.length < 6) return setPinState("idle");
+    setPinState("checking");
+    try {
+      const res = await fetch(`/api/pincode/${pin}`);
+      const r = await res.json();
+      if (r.status === "valid") {
+        setForm((f) => (f.pincode === pin ? { ...f, city: r.city || f.city, state: r.state || f.state } : f));
+        setPinState("ok");
+      } else setPinState(r.status === "invalid" ? "invalid" : "unknown");
+    } catch {
+      setPinState("unknown");
+    }
+  }
 
   async function post(url: string, body: unknown) {
     const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -105,7 +121,6 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
     const { res, body } = await post("/api/orders", {
       items: cart.items.map((i) => ({ variantId: i.variantId, quantity: i.quantity })),
       address,
-      method,
       couponCode: data?.couponCode ?? null,
       expectedTotal: data?.total,
       giftBox,
@@ -129,8 +144,6 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
     };
     const failed = (id: string) => router.push(`/order-failed?id=${id}`);
 
-    if (body.method === "COD") return done(body.orderId);
-
     if (body.simulated) {
       setBusy(false);
       setTestPay({ orderId: body.orderId });
@@ -151,7 +164,7 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
       description: `Order ${body.orderNumber}`,
       order_id: body.razorpayOrderId,
       prefill: { name: address.name, email: user?.email, contact: address.phone },
-      theme: { color: "#d8899f" },
+      theme: { color: "#b08d57" },
       handler: async (r: { razorpay_payment_id: string; razorpay_signature: string }) => {
         const v = await post("/api/orders/verify", { orderId: body.orderId, razorpayPaymentId: r.razorpay_payment_id, razorpaySignature: r.razorpay_signature });
         if (v.res.ok) done(body.orderId);
@@ -186,8 +199,8 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
     );
   }
 
-  const addrValid = selected !== "new" || (form.name.length > 1 && /^[+\d][\d\s-]{8,16}$/.test(form.phone) && form.line1.length > 2 && form.city.length > 1 && form.state.length > 1 && /^\d{6}$/.test(form.pincode));
-  const ready = Boolean(user) && addrValid && Boolean(data) && !error;
+  const addrValid = selected !== "new" || (pinState !== "invalid" && pinState !== "checking" && form.name.length > 1 && /^[+\d][\d\s-]{8,16}$/.test(form.phone) && form.line1.length > 2 && form.city.length > 1 && form.state.length > 1 && /^\d{6}$/.test(form.pincode));
+  const ready = Boolean(user) && onlineAvailable && addrValid && Boolean(data) && !error;
 
   return (
     <div className="wrap py-10 lg:py-14">
@@ -230,14 +243,14 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
             <h2 className="mb-4 flex items-center gap-3 font-serif text-xl font-semibold"><span className="grid h-7 w-7 place-items-center rounded-full bg-ink text-sm text-white">2</span> Delivery address</h2>
             <div className="space-y-3">
               {addresses.map((a) => (
-                <label key={a.id} className={cn("flex cursor-pointer gap-3 rounded-sm border-[1.5px] p-4 text-sm", selected === a.id ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
-                  <input type="radio" name="addr" className="mt-1 accent-[#1a1a1a]" checked={selected === a.id} onChange={() => setSelected(a.id!)} />
+                <label key={a.id} className={cn("flex cursor-pointer gap-3 rounded-sm border-[1.5px] p-4 text-sm", selected === a.id ? "border-ink bg-cream" : "border-[#e3d8c6]")}>
+                  <input type="radio" name="addr" className="mt-1 accent-[#241f1a]" checked={selected === a.id} onChange={() => setSelected(a.id!)} />
                   <span><strong>{a.name}</strong> · {a.phone}<br />{a.line1}{a.line2 && `, ${a.line2}`}<br />{a.city}, {a.state} {a.pincode}</span>
                 </label>
               ))}
               {addresses.length > 0 && (
-                <label className={cn("flex cursor-pointer items-center gap-3 rounded-sm border-[1.5px] p-4 text-sm font-medium", selected === "new" ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
-                  <input type="radio" name="addr" className="accent-[#1a1a1a]" checked={selected === "new"} onChange={() => setSelected("new")} /> Use a new address
+                <label className={cn("flex cursor-pointer items-center gap-3 rounded-sm border-[1.5px] p-4 text-sm font-medium", selected === "new" ? "border-ink bg-cream" : "border-[#e3d8c6]")}>
+                  <input type="radio" name="addr" className="accent-[#241f1a]" checked={selected === "new"} onChange={() => setSelected("new")} /> Use a new address
                 </label>
               )}
             </div>
@@ -249,8 +262,8 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
                 <div className="sm:col-span-2"><label className="label" htmlFor="a-l2">Landmark / area (optional)</label><input id="a-l2" className="input" value={form.line2} onChange={set("line2")} autoComplete="address-line2" /></div>
                 <div><label className="label" htmlFor="a-city">City</label><input id="a-city" className="input" value={form.city} onChange={set("city")} autoComplete="address-level2" /></div>
                 <div><label className="label" htmlFor="a-state">State</label><input id="a-state" className="input" value={form.state} onChange={set("state")} autoComplete="address-level1" /></div>
-                <div><label className="label" htmlFor="a-pin">Pincode</label><input id="a-pin" inputMode="numeric" maxLength={6} className="input" value={form.pincode} onChange={set("pincode")} autoComplete="postal-code" /></div>
-                <label className="flex items-center gap-2 self-end pb-3 text-sm"><input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="accent-[#1a1a1a]" /> Save for next time</label>
+                <div><label className="label" htmlFor="a-pin">Pincode</label><input id="a-pin" inputMode="numeric" maxLength={6} className="input" value={form.pincode} onChange={onPincode} autoComplete="postal-code" aria-invalid={pinState === "invalid"} />{pinState === "invalid" && <p className="mt-1.5 text-xs font-medium text-berry">We couldn't find this pincode. Please check it.</p>}{pinState === "checking" && <p className="mt-1.5 text-xs text-muted">Checking pincode…</p>}{pinState === "ok" && <p className="mt-1.5 text-xs text-emerald-700">Pincode verified</p>}</div>
+                <label className="flex items-center gap-2 self-end pb-3 text-sm"><input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="accent-[#241f1a]" /> Save for next time</label>
               </div>
             )}
           </section>
@@ -259,8 +272,8 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
           {gift.enabled && (
             <section className={cn("card p-6 transition", !user && "pointer-events-none opacity-50")}>
               <h2 className="mb-4 flex items-center gap-3 font-serif text-xl font-semibold"><span className="grid h-7 w-7 place-items-center rounded-full bg-ink text-sm text-white">3</span> Gift options</h2>
-              <label className={cn("flex cursor-pointer items-start gap-4 rounded-sm border-[1.5px] p-4", giftBox ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
-                <input type="checkbox" className="mt-1 h-4 w-4 accent-[#1a1a1a]" checked={giftBox} onChange={(e) => setGiftBox(e.target.checked)} />
+              <label className={cn("flex cursor-pointer items-start gap-4 rounded-sm border-[1.5px] p-4", giftBox ? "border-ink bg-cream" : "border-[#e3d8c6]")}>
+                <input type="checkbox" className="mt-1 h-4 w-4 accent-[#241f1a]" checked={giftBox} onChange={(e) => setGiftBox(e.target.checked)} />
                 {gift.image && <span className="relative hidden h-20 w-20 shrink-0 overflow-hidden rounded-sm bg-white sm:block"><Image src={gift.image} alt="" fill sizes="80px" className="object-cover" /></span>}
                 <span className="text-sm">
                   <span className="flex items-center gap-2 font-semibold"><Gift size={17} /> Add a gift box {gift.fee > 0 ? `for ${formatINR(gift.fee)}` : "(free)"}</span>
@@ -281,17 +294,13 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
           <section className={cn("card p-6 transition", !user && "pointer-events-none opacity-50")}>
             <h2 className="mb-4 flex items-center gap-3 font-serif text-xl font-semibold"><span className="grid h-7 w-7 place-items-center rounded-full bg-ink text-sm text-white">{gift.enabled ? 4 : 3}</span> Payment</h2>
             <div className="space-y-3">
-              {onlineAvailable && (
-                <label className={cn("flex cursor-pointer items-start gap-3 rounded-sm border-[1.5px] p-4", method === "ONLINE" ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
-                  <input type="radio" name="pay" className="mt-1 accent-[#1a1a1a]" checked={method === "ONLINE"} onChange={() => setMethod("ONLINE")} />
-                  <span className="text-sm"><span className="flex items-center gap-2 font-semibold"><CreditCard size={17} /> Pay online</span><span className="text-muted">UPI, cards, net banking and wallets{simulated && " (test mode, no real payment)"}</span></span>
-                </label>
-              )}
-              {codEnabled && (
-                <label className={cn("flex cursor-pointer items-start gap-3 rounded-sm border-[1.5px] p-4", method === "COD" ? "border-ink bg-cream" : "border-[#e7e0dc]")}>
-                  <input type="radio" name="pay" className="mt-1 accent-[#1a1a1a]" checked={method === "COD"} onChange={() => setMethod("COD")} />
-                  <span className="text-sm"><span className="flex items-center gap-2 font-semibold"><Banknote size={17} /> Cash on delivery</span><span className="text-muted">Pay when your order arrives{codFee > 0 && ` (+${formatINR(codFee)} fee)`}</span></span>
-                </label>
+              {onlineAvailable ? (
+                <div className="flex items-start gap-3 border-[1.5px] border-ink bg-cream p-4 text-sm">
+                  <CreditCard size={18} className="mt-0.5 shrink-0" />
+                  <span><span className="block font-semibold">Pay securely online</span><span className="text-muted">UPI, cards, net banking and wallets through Razorpay. We accept prepaid orders only.{simulated && " (Test mode: no real payment.)"}</span></span>
+                </div>
+              ) : (
+                <p className="border border-line bg-blush p-4 text-sm text-berry">Online payment isn't available right now. Please try again shortly.</p>
               )}
             </div>
           </section>
@@ -317,7 +326,7 @@ export default function CheckoutClient({ user, addresses, codEnabled, codFee, gi
           {error && <p className="rounded-sm bg-blush p-3 text-sm font-medium text-berry">{error.message} <Link href="/cart" className="underline">Review your bag</Link></p>}
           {message && <p role="alert" className="rounded-sm bg-blush p-3 text-sm font-medium text-berry">{message}</p>}
           <button className="btn btn-dark btn-block !py-4" disabled={!ready || busy} onClick={placeOrder}>
-            <Lock size={15} /> {busy ? "Please wait…" : method === "COD" ? `Place order · ${data ? formatINR(data.total) : ""}` : `Pay ${data ? formatINR(data.total) : ""}`}
+            <Lock size={15} /> {busy ? "Please wait…" : `Pay ${data ? formatINR(data.total) : ""}`}
           </button>
           {!user && <p className="text-center text-xs text-muted">Verify your email above to continue.</p>}
           <p className="text-center text-xs text-muted">By placing your order you agree to our <Link href="/terms" className="underline">terms</Link> and <Link href="/returns" className="underline">exchange policy</Link>.</p>

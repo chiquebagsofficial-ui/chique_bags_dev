@@ -7,11 +7,9 @@ import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart } from "@/components/providers";
 import { formatINR } from "@/lib/utils";
 
-export default function CartDrawer({ freeShippingThreshold }: { freeShippingThreshold: number }) {
+export default function CartDrawer() {
   const cart = useCart();
   const open = cart.drawerOpen;
-  const remaining = Math.max(0, freeShippingThreshold - cart.subtotal);
-  const progress = freeShippingThreshold > 0 ? Math.min(100, (cart.subtotal / freeShippingThreshold) * 100) : 100;
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -36,19 +34,6 @@ export default function CartDrawer({ freeShippingThreshold }: { freeShippingThre
           <button onClick={() => cart.setDrawerOpen(false)} aria-label="Close bag"><X size={22} /></button>
         </div>
 
-        {cart.items.length > 0 && (
-          <div className="border-b border-line bg-blush px-6 py-3.5 text-sm">
-            {remaining > 0 ? (
-              <p>Add <strong>{formatINR(remaining)}</strong> more for <strong>free shipping</strong></p>
-            ) : (
-              <p className="font-medium text-berry">You've unlocked free shipping</p>
-            )}
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white">
-              <div className="h-full rounded-full bg-rose transition-all duration-500" style={{ width: `${progress}%` }} />
-            </div>
-          </div>
-        )}
-
         <div className="flex-1 overflow-y-auto px-6">
           {cart.items.length === 0 ? (
             <div className="grid h-full place-items-center text-center">
@@ -70,7 +55,7 @@ export default function CartDrawer({ freeShippingThreshold }: { freeShippingThre
                     <Link href={`/products/${i.slug}`} onClick={() => cart.setDrawerOpen(false)} className="line-clamp-2 text-sm font-medium leading-snug">{i.name}</Link>
                     <p className="mt-0.5 text-xs text-muted">{i.variantName}</p>
                     <div className="mt-auto flex items-center justify-between pt-2">
-                      <div className="flex items-center rounded-none border border-[#e7e0dc]">
+                      <div className="flex items-center rounded-none border border-[#e3d8c6]">
                         <button className="grid h-8 w-8 place-items-center" aria-label="Decrease quantity" onClick={() => (i.quantity > 1 ? cart.setQty(i.variantId, i.quantity - 1) : cart.remove(i.variantId))}><Minus size={14} /></button>
                         <span className="w-6 text-center text-sm font-semibold">{i.quantity}</span>
                         <button className="grid h-8 w-8 place-items-center" aria-label="Increase quantity" onClick={() => cart.setQty(i.variantId, i.quantity + 1)}><Plus size={14} /></button>
@@ -91,7 +76,7 @@ export default function CartDrawer({ freeShippingThreshold }: { freeShippingThre
               <span className="text-sm text-muted">Subtotal</span>
               <span className="text-lg font-semibold">{formatINR(cart.subtotal)}</span>
             </div>
-            <p className="mb-4 mt-1 text-xs text-muted">Shipping and coupons are applied at checkout.</p>
+            <p className="mb-4 mt-1 text-xs text-muted">Free shipping on every order. Taxes included.</p>
             <Link href="/checkout" onClick={() => cart.setDrawerOpen(false)} className="btn btn-dark btn-block">Checkout</Link>
             <Link href="/cart" onClick={() => cart.setDrawerOpen(false)} className="mt-3 block text-center text-sm font-medium underline underline-offset-4">View full bag</Link>
           </div>

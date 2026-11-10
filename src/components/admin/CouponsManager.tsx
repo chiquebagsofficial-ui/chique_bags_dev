@@ -62,8 +62,8 @@ export default function CouponsManager({ coupons }: { coupons: CouponRow[] }) {
           <div><label className="label" htmlFor="cp-exp">Expires on (optional)</label><input id="cp-exp" type="date" className="input" value={f.expiresAt} onChange={(e) => setF({ ...f, expiresAt: e.target.value })} /></div>
           <div className="sm:col-span-2"><label className="label" htmlFor="cp-desc">Description</label><input id="cp-desc" className="input" value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></div>
           <div className="flex flex-col justify-end gap-2 text-sm">
-            <label className="flex items-center gap-2"><input type="checkbox" checked={f.oncePerUser} onChange={(e) => setF({ ...f, oncePerUser: e.target.checked })} className="accent-[#1a1a1a]" /> One use per customer</label>
-            <label className="flex items-center gap-2"><input type="checkbox" checked={f.isActive} onChange={(e) => setF({ ...f, isActive: e.target.checked })} className="accent-[#1a1a1a]" /> Active</label>
+            <label className="flex items-center gap-2"><input type="checkbox" checked={f.oncePerUser} onChange={(e) => setF({ ...f, oncePerUser: e.target.checked })} className="accent-[#241f1a]" /> One use per customer</label>
+            <label className="flex items-center gap-2"><input type="checkbox" checked={f.isActive} onChange={(e) => setF({ ...f, isActive: e.target.checked })} className="accent-[#241f1a]" /> Active</label>
           </div>
           {error && <p role="alert" className="rounded-sm bg-blush p-3 text-sm font-medium text-berry sm:col-span-2 lg:col-span-3">{error}</p>}
           <div className="flex gap-3 sm:col-span-2 lg:col-span-3"><button className="btn btn-dark btn-sm" disabled={busy}>{busy ? "Saving…" : "Save coupon"}</button><button type="button" className="btn btn-line btn-sm" onClick={() => setEditing(null)}>Cancel</button></div>

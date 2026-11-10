@@ -33,6 +33,7 @@ enum PaymentStatus {
   UNPAID
   PAID
   FAILED
+  PARTIALLY_REFUNDED
   REFUNDED
 }
 
@@ -215,6 +216,10 @@ model Order {
   giftFee         Int           @default(0)
   giftNote        String?
   total           Int
+  refundedAmount  Int           @default(0)
+  invoiceNumber   String?       @unique
+  invoiceDate     DateTime?
+  internalNotes   String?
   couponCode      String?
   paymentMethod   PaymentMethod
   paymentStatus   PaymentStatus @default(UNPAID)
@@ -237,7 +242,8 @@ model Order {
   updatedAt       DateTime      @updatedAt
 
   user  User        @relation(fields: [userId], references: [id])
-  items OrderItem[]
+  items   OrderItem[]
+  returns ReturnRequest[]
 
   @@index([userId])
   @@index([status, createdAt])
@@ -352,4 +358,81 @@ model Banner {
   createdAt   DateTime @default(now())
 
   @@map("banners")
+}
+
+// ─── Returns & refunds ──────────────────────────────────────────────────
+
+enum ReturnReason {
+  DAMAGED
+  DEFECTIVE
+  WRONG_ITEM
+  NOT_AS_DESCRIBED
+  OTHER
+}
+
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  RECEIVED
+  REFUNDED
+  CLOSED
+}
+
+model ReturnRequest {
+  id              String       @id @default(cuid())
+  number          String       @unique // RR-26-0001
+  orderId         String
+  userId          String
+  reason          ReturnReason
+  details         String       @db.Text
+  photos          String[]
+  items           Json // [{ orderItemId, name, variantName, quantity, price }]
+  status          ReturnStatus @default(REQUESTED)
+  refundAmount    Int          @default(0) // total actually refunded for this request
+  refundReference String? // Razorpay refund id, or "manual"
+  adminNote       String?
+  restocked       Boolean      @default(false)
+  createdByAdmin  Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  resolvedAt      DateTime?
+
+  order  Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  events ReturnEvent[]
+
+  @@index([orderId])
+  @@index([status, createdAt])
+  @@map("return_requests")
+}
+
+// Every status change and refund is recorded here, with who did it.
+model ReturnEvent {
+  id        String       @id @default(cuid())
+  returnId  String
+  status    ReturnStatus
+  note      String?
+  amount    Int? // refund amount, when the event is a refund
+  actor     String // "customer" or the admin's name
+  createdAt DateTime     @default(now())
+
+  request ReturnRequest @relation(fields: [returnId], references: [id], onDelete: Cascade)
+
+  @@index([returnId])
+  @@map("return_events")
+}
+
+model ReturnCounter {
+  year Int @id
+  seq  Int @default(0)
+
+  @@map("return_counters")
+}
+
+// GST invoice numbers run per financial year (April to March).
+model InvoiceCounter {
+  fy  String @id // e.g. "26-27"
+  seq Int    @default(0)
+
+  @@map("invoice_counters")
 }

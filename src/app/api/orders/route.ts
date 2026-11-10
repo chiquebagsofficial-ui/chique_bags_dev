@@ -9,7 +9,6 @@ export const dynamic = "force-dynamic";
 const schema = z.object({
   items: cartSchema,
   address: addressSchema,
-  method: z.enum(["COD", "ONLINE"]),
   couponCode: z.string().trim().max(40).nullish(),
   expectedTotal: z.number().int().nonnegative().optional(),
   giftBox: z.boolean().optional(),
@@ -24,7 +23,7 @@ export async function POST(req: Request) {
 
   const parsed = await parseBody(req, schema);
   if ("error" in parsed) return parsed.error;
-  const { items, address, method, couponCode, expectedTotal, giftBox, giftNote } = parsed.data;
+  const { items, address, couponCode, expectedTotal, giftBox, giftNote } = parsed.data;
 
   const result = await createOrder({
     userId: user.id,
@@ -34,7 +33,6 @@ export async function POST(req: Request) {
     address,
     items,
     couponCode,
-    method,
     expectedTotal,
     giftBox,
     giftNote,

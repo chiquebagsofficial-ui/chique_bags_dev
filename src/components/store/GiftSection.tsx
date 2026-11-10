@@ -13,7 +13,7 @@ export default function GiftSection({ image, fee, full = false }: { image: strin
     <section className={full ? "" : "bg-blush"}>
       <div className={`grid ${full ? "" : "wrap !px-0 lg:!px-0"} lg:grid-cols-2`}>
         <div className="relative min-h-[340px] sm:min-h-[460px] lg:min-h-[620px]">
-          {image && <Image src={image} alt="A gift box tied with a pink ribbon" fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover" priority={full} />}
+          {image && <Image src={image} alt="A gift box tied with a ribbon, with a note card" fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover" priority={full} />}
         </div>
         <div className="flex flex-col justify-center bg-blush px-6 py-14 sm:px-14 lg:px-20 lg:py-20">
           <p className="eyebrow">Gifting</p>

@@ -42,7 +42,7 @@ export default async function AdminOrders({ searchParams }: { searchParams: Prom
             <Td>{o.customerName}<br /><span className="text-xs text-muted">{o.customerEmail}</span></Td>
             <Td className="text-muted">{formatDate(o.createdAt)}</Td>
             <Td>{o.items.reduce((n, i) => n + i.quantity, 0)}</Td>
-            <Td className="text-xs">{o.paymentMethod === "COD" ? "COD" : "Online"} · {o.paymentStatus.toLowerCase()}</Td>
+            <Td className="text-xs">{o.paymentStatus.toLowerCase().replace("_", " ")}</Td>
             <Td><StatusBadge status={o.status} /></Td>
             <Td className="font-semibold">{formatINR(o.total)}</Td>
           </tr>

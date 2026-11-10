@@ -3,6 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AlertTriangle, Gift } from "lucide-react";
 import OrderControls from "@/components/admin/OrderControls";
+import OrderDetailsEditor from "@/components/admin/OrderDetailsEditor";
+import ReturnRequestForm from "@/components/store/ReturnRequestForm";
+import { ReturnStatusBadge } from "@/components/store/ReturnTimeline";
+import { REASON_LABEL } from "@/lib/returns";
 import StatusBadge from "@/components/store/StatusBadge";
 import { prisma } from "@/lib/db";
 import { formatDate, formatINR } from "@/lib/utils";
@@ -12,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminOrderDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const order = await prisma.order.findUnique({ where: { id }, include: { items: true, user: { select: { id: true } } } });
+  const order = await prisma.order.findUnique({ where: { id }, include: { items: true, user: { select: { id: true } }, returns: { orderBy: { createdAt: "desc" } } } });
   if (!order) notFound();
   const a = order.shippingAddress as Record<string, string>;
 
@@ -57,6 +61,24 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               <div className="flex justify-between text-base font-semibold"><dt>Total</dt><dd>{formatINR(order.total)}</dd></div>
             </dl>
           </section>
+          <section className="card space-y-4 p-6">
+            <h2 className="font-serif text-lg font-semibold">Returns &amp; refunds</h2>
+            {order.refundedAmount > 0 && <p className="bg-cream p-3 text-sm">Refunded so far: <strong>{formatINR(order.refundedAmount)}</strong> of {formatINR(order.total)}</p>}
+            {order.returns.length > 0 ? (
+              <ul className="divide-y divide-line text-sm">
+                {order.returns.map((r) => (
+                  <li key={r.id} className="flex items-center justify-between gap-3 py-2.5">
+                    <Link href={`/admin/returns/${r.id}`} className="font-medium hover:text-berry">{r.number} <span className="font-normal text-muted">· {REASON_LABEL[r.reason]}</span></Link>
+                    <ReturnStatusBadge status={r.status} />
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="text-sm text-muted">No returns on this order.</p>}
+            {order.paymentStatus !== "UNPAID" && order.paymentStatus !== "FAILED" && order.paymentStatus !== "REFUNDED" && (
+              <ReturnRequestForm mode="admin" orderId={order.id} items={order.items.map((i) => ({ id: i.id, name: i.name, variantName: i.variantName, quantity: i.quantity, price: i.price }))} />
+            )}
+          </section>
+          <OrderDetailsEditor id={order.id} customerName={order.customerName} customerPhone={order.customerPhone} address={{ name: a.name ?? "", phone: a.phone ?? "", line1: a.line1 ?? "", line2: a.line2 ?? "", city: a.city ?? "", state: a.state ?? "", pincode: a.pincode ?? "" }} internalNotes={order.internalNotes ?? ""} />
           <OrderControls id={order.id} status={order.status} courier={order.courier} trackingUrl={order.trackingUrl} needsAttention={order.needsAttention} awaitingPayment={order.status === "PENDING" && order.paymentMethod === "ONLINE"} />
         </div>
 
@@ -73,8 +95,8 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
           </section>
           <section className="card space-y-1 p-6 text-sm">
             <h2 className="mb-2 font-serif text-lg font-semibold">Payment</h2>
-            <p>{order.paymentMethod === "COD" ? "Cash on delivery" : "Online (Razorpay)"}</p>
-            <p className="text-muted">Status: {order.paymentStatus.toLowerCase()}{order.paidAt && ` · ${formatDate(order.paidAt, true)}`}</p>
+            <p>Online (Razorpay)</p>
+            <p className="text-muted">Status: {order.paymentStatus.toLowerCase().replace("_", " ")}{order.paidAt && ` · ${formatDate(order.paidAt, true)}`}</p>
             {order.razorpayPaymentId && <p className="break-all text-xs text-muted">Payment ID: {order.razorpayPaymentId}</p>}
           </section>
         </div>

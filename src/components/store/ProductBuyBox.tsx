@@ -67,7 +67,7 @@ export default function ProductBuyBox({ product, variants }: Props) {
       </div>
 
       <div className="mt-7 flex items-center gap-2 sm:gap-3">
-        <div className="flex items-center rounded-none border-[1.5px] border-[#e7e0dc]">
+        <div className="flex items-center rounded-none border-[1.5px] border-[#e3d8c6]">
           <button type="button" className="grid h-12 w-9 place-items-center sm:w-11 disabled:opacity-40" aria-label="Decrease quantity" disabled={qty <= 1} onClick={() => setQty(qty - 1)}><Minus size={16} /></button>
           <span className="w-7 text-center font-semibold sm:w-8" aria-live="polite">{qty}</span>
           <button type="button" className="grid h-12 w-9 place-items-center sm:w-11 disabled:opacity-40" aria-label="Increase quantity" disabled={qty >= maxQty} onClick={() => setQty(qty + 1)}><Plus size={16} /></button>
@@ -88,7 +88,7 @@ export default function ProductBuyBox({ product, variants }: Props) {
           onClick={() => wish.toggle(product.id)}
           aria-pressed={saved}
           aria-label={saved ? "Remove from favourites" : "Save to favourites"}
-          className="grid h-[50px] w-[46px] shrink-0 sm:w-[50px] place-items-center rounded-none border-[1.5px] border-[#e7e0dc] transition hover:border-rose"
+          className="grid h-[50px] w-[46px] shrink-0 sm:w-[50px] place-items-center rounded-none border-[1.5px] border-[#e3d8c6] transition hover:border-rose"
         >
           <Heart size={19} className={cn(saved ? "fill-rose text-rose" : "")} />
         </button>

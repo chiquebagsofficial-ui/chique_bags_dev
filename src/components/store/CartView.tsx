@@ -53,7 +53,7 @@ export default function CartView() {
                   </div>
                   {problem && <p className="mt-2 text-sm font-medium text-berry">{error?.message}</p>}
                   <div className="mt-auto flex items-end justify-between pt-3">
-                    <div className="flex items-center rounded-none border-[1.5px] border-[#e7e0dc]">
+                    <div className="flex items-center rounded-none border-[1.5px] border-[#e3d8c6]">
                       <button className="grid h-9 w-9 place-items-center" aria-label="Decrease quantity" onClick={() => (i.quantity > 1 ? cart.setQty(i.variantId, i.quantity - 1) : cart.remove(i.variantId))}><Minus size={14} /></button>
                       <span className="w-7 text-center text-sm font-semibold">{i.quantity}</span>
                       <button className="grid h-9 w-9 place-items-center" aria-label="Increase quantity" onClick={() => cart.setQty(i.variantId, i.quantity + 1)}><Plus size={14} /></button>
@@ -74,7 +74,7 @@ export default function CartView() {
           <CouponBox applied={data?.couponCode ?? null} error={data?.couponError ?? null} onApply={setCoupon} onRemove={() => setCoupon(null)} />
           {data ? <PriceSummary p={data} /> : error && !error.variantId ? <p className="text-sm text-berry">{error.message}</p> : <p className="text-sm text-muted">Calculating…</p>}
           {error?.variantId && <p className="rounded-sm bg-blush p-3 text-sm font-medium text-berry">{error.message}</p>}
-          {data && data.shipping > 0 && <p className="text-xs text-muted">Add {formatINR(data.freeShippingThreshold - data.subtotal)} more for free shipping.</p>}
+          <p className="text-xs text-muted">Free shipping on every order. We accept prepaid orders only.</p>
           <Link href="/checkout" aria-disabled={Boolean(error)} className={`btn btn-dark btn-block ${error ? "pointer-events-none opacity-50" : ""}`}>Proceed to checkout</Link>
           <Link href="/shop" className="block text-center text-sm font-medium underline underline-offset-4">Continue shopping</Link>
         </aside>

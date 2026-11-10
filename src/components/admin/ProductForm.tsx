@@ -146,7 +146,7 @@ export default function ProductForm({ initial, categories }: { initial: ProductF
                 </div>
               </div>
             ))}
-            <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="grid aspect-[4/5] place-items-center rounded-sm border-2 border-dashed border-[#e0d6d0] text-sm text-muted hover:border-rose hover:text-rose">
+            <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} className="grid aspect-[4/5] place-items-center rounded-sm border-2 border-dashed border-[#dccfb8] text-sm text-muted hover:border-rose hover:text-rose">
               <span className="flex flex-col items-center gap-1"><ImagePlus size={22} />{uploading ? "Uploading…" : "Upload"}</span>
             </button>
           </div>
@@ -162,7 +162,7 @@ export default function ProductForm({ initial, categories }: { initial: ProductF
           <div className="space-y-3">
             {v.variants.map((x, i) => (
               <div key={x.id ?? i} className="flex flex-wrap items-center gap-3">
-                <input type="color" aria-label="Colour swatch" value={x.hex} onChange={(e) => setV({ ...v, variants: v.variants.map((y, n) => (n === i ? { ...y, hex: e.target.value } : y)) })} className="h-11 w-12 cursor-pointer rounded-sm border border-[#e7e0dc] bg-white p-1" />
+                <input type="color" aria-label="Colour swatch" value={x.hex} onChange={(e) => setV({ ...v, variants: v.variants.map((y, n) => (n === i ? { ...y, hex: e.target.value } : y)) })} className="h-11 w-12 cursor-pointer rounded-sm border border-[#e3d8c6] bg-white p-1" />
                 <input required className="input min-w-0 flex-1" placeholder="Colour name (e.g. Dusty Rose)" aria-label="Colour name" value={x.name} onChange={(e) => setV({ ...v, variants: v.variants.map((y, n) => (n === i ? { ...y, name: e.target.value } : y)) })} />
                 <input type="number" min={0} className="input !w-24" aria-label="Stock" placeholder="Stock" value={x.stock} onChange={(e) => setV({ ...v, variants: v.variants.map((y, n) => (n === i ? { ...y, stock: e.target.value === "" ? "" : Number(e.target.value) } : y)) })} />
                 <button type="button" aria-label="Remove colour" disabled={v.variants.length === 1} className="text-muted hover:text-berry disabled:opacity-30" onClick={() => setV({ ...v, variants: v.variants.filter((_, n) => n !== i) })}><Trash2 size={17} /></button>
@@ -194,7 +194,7 @@ export default function ProductForm({ initial, categories }: { initial: ProductF
             </select>
           </div>
           {([["isActive", "Visible in the store"], ["isNew", "Show “New” badge"], ["isBestSeller", "Bestseller"], ["isFeatured", "Featured on homepage hero"]] as const).map(([k, label]) => (
-            <label key={k} className="flex items-center gap-3 text-sm"><input type="checkbox" checked={v[k]} onChange={flag(k)} className="h-4 w-4 accent-[#1a1a1a]" /> {label}</label>
+            <label key={k} className="flex items-center gap-3 text-sm"><input type="checkbox" checked={v[k]} onChange={flag(k)} className="h-4 w-4 accent-[#241f1a]" /> {label}</label>
           ))}
         </section>
 

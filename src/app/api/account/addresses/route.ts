@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { fail, ok, parseBody } from "@/lib/api";
 import { getSessionUser } from "@/lib/auth";
+import { lookupPincode } from "@/lib/pincode";
 import { addressSchema } from "@/lib/validations";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,9 @@ export async function POST(req: Request) {
   const parsed = await parseBody(req, addressSchema);
   if ("error" in parsed) return parsed.error;
   const { id: _id, isDefault, line2, ...rest } = parsed.data;
+  const pin = await lookupPincode(parsed.data.pincode);
+  if (pin.status === "invalid") return fail("We couldn't find this pincode. Please check it.", 400);
+
   void _id;
 
   const count = await prisma.address.count({ where: { userId: user.id } });

@@ -8,17 +8,15 @@ export interface Pricing {
   mrpTotal: number;
   discount: number;
   shipping: number;
-  codFee: number;
   giftFee: number;
   total: number;
   couponCode: string | null;
   couponError: string | null;
-  freeShippingThreshold: number;
   lines: { variantId: string; price: number; mrp: number; quantity: number; stock: number }[];
 }
 
 /** Asks the server for the real totals (prices, coupon, shipping) whenever the bag changes. */
-export function usePricing(items: CartItem[], couponCode: string | null, method?: "COD" | "ONLINE", enabled = true, giftBox = false) {
+export function usePricing(items: CartItem[], couponCode: string | null, enabled = true, giftBox = false) {
   const [data, setData] = useState<Pricing | null>(null);
   const [error, setError] = useState<{ message: string; variantId?: string } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -36,7 +34,7 @@ export function usePricing(items: CartItem[], couponCode: string | null, method?
     fetch("/api/cart/price", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: items.map((i) => ({ variantId: i.variantId, quantity: i.quantity })), couponCode, method, giftBox }),
+      body: JSON.stringify({ items: items.map((i) => ({ variantId: i.variantId, quantity: i.quantity })), couponCode, giftBox }),
       signal: ctrl.signal,
     })
       .then(async (res) => {
@@ -55,7 +53,7 @@ export function usePricing(items: CartItem[], couponCode: string | null, method?
       .finally(() => setLoading(false));
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, couponCode, method, enabled, giftBox]);
+  }, [key, couponCode, enabled, giftBox]);
 
   return { data, error, loading };
 }

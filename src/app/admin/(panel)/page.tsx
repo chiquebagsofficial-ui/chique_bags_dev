@@ -28,6 +28,8 @@ export default async function DashboardPage() {
     prisma.productVariant.findMany({ where: { stock: { lte: 3 }, product: { isActive: true } }, include: { product: { select: { id: true, name: true } } }, orderBy: { stock: "asc" }, take: 6 }),
   ]);
 
+  const pendingReturns = await prisma.returnRequest.count({ where: { status: "REQUESTED" } });
+
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(now.getTime() - (6 - i) * 86400_000);
     return { key: dayKey(d), day: d.toLocaleDateString("en-IN", { weekday: "short", timeZone: "Asia/Kolkata" }), sales: 0, orders: 0 };
@@ -44,6 +46,13 @@ export default async function DashboardPage() {
   return (
     <>
       <PageHead title="Dashboard" subtitle="How the store is doing" />
+
+      {pendingReturns > 0 && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border border-gold/50 bg-blush p-5 text-sm">
+          <p className="font-medium">{pendingReturns} return request{pendingReturns > 1 ? "s" : ""} waiting for your review</p>
+          <Link href="/admin/returns?status=REQUESTED" className="btn btn-dark btn-sm">Review</Link>
+        </div>
+      )}
 
       {attention.length > 0 && (
         <div className="mb-6 rounded-sm border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">

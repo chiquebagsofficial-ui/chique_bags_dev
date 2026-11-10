@@ -2,13 +2,9 @@ import { cache } from "react";
 import { prisma } from "@/lib/db";
 
 export const DEFAULT_SETTINGS = {
-  announcement: "Launch special: flat 15% off your first order. Use code CHIQUE15",
-  freeShippingThreshold: "999",
-  shippingFee: "79",
-  codEnabled: "true",
-  codFee: "0",
+  announcement: "Free shipping on every order · Prepaid orders, delivered across India",
   giftBoxEnabled: "true",
-  giftBoxFee: "149",
+  giftBoxFee: "200",
   giftBoxImage: "",
   storyImage: "",
   contactEmail: "hello@chiquebags.in",
@@ -17,25 +13,33 @@ export const DEFAULT_SETTINGS = {
   instagram: "https://www.instagram.com/chiquebagsofficial/",
   address: "India",
   ownerEmail: "",
+  // GST / invoice details
+  legalName: "Chique Bags",
+  gstin: "",
+  gstRate: "18",
+  hsnCode: "4202",
+  businessState: "",
 };
 
 export type SettingKey = keyof typeof DEFAULT_SETTINGS;
 export type Settings = {
   announcement: string;
-  freeShippingThreshold: number;
-  shippingFee: number;
-  codEnabled: boolean;
-  codFee: number;
   giftBoxEnabled: boolean;
   giftBoxFee: number;
   giftBoxImage: string;
   storyImage: string;
   contactEmail: string;
   contactPhone: string;
+  /** WhatsApp number with country code, digits only, e.g. 919876543210 */
   whatsapp: string;
   instagram: string;
   address: string;
   ownerEmail: string;
+  legalName: string;
+  gstin: string;
+  gstRate: number;
+  hsnCode: string;
+  businessState: string;
 };
 
 export const getSettings = cache(async (): Promise<Settings> => {
@@ -44,20 +48,21 @@ export const getSettings = cache(async (): Promise<Settings> => {
   for (const r of rows) raw[r.key] = r.value;
   return {
     announcement: raw.announcement,
-    freeShippingThreshold: Number(raw.freeShippingThreshold) || 0,
-    shippingFee: Number(raw.shippingFee) || 0,
-    codEnabled: raw.codEnabled === "true",
-    codFee: Number(raw.codFee) || 0,
     giftBoxEnabled: raw.giftBoxEnabled === "true",
     giftBoxFee: Number(raw.giftBoxFee) || 0,
     giftBoxImage: raw.giftBoxImage,
     storyImage: raw.storyImage,
     contactEmail: raw.contactEmail,
     contactPhone: raw.contactPhone,
-    whatsapp: raw.whatsapp,
+    whatsapp: (raw.whatsapp || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "").replace(/\D/g, ""),
     instagram: raw.instagram,
     address: raw.address,
     ownerEmail: raw.ownerEmail || process.env.OWNER_EMAIL || "",
+    legalName: raw.legalName,
+    gstin: raw.gstin.trim().toUpperCase(),
+    gstRate: Number(raw.gstRate) || 0,
+    hsnCode: raw.hsnCode,
+    businessState: raw.businessState,
   };
 });
 

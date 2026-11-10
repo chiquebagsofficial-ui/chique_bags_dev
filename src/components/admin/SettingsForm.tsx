@@ -33,15 +33,17 @@ export default function SettingsForm({ initial }: { initial: Settings }) {
         <div className="sm:col-span-2"><label className="label" htmlFor="s-ann">Announcement bar text (leave empty to hide)</label><input id="s-ann" className="input" value={s.announcement} onChange={str("announcement")} /></div>
       </section>
       <section className={sec}>
-        <h2 className="font-serif text-lg font-semibold sm:col-span-2">Shipping &amp; payment</h2>
-        <div><label className="label" htmlFor="s-fs">Free shipping above (₹)</label><input id="s-fs" type="number" min={0} className="input" value={s.freeShippingThreshold} onChange={numf("freeShippingThreshold")} /></div>
-        <div><label className="label" htmlFor="s-fee">Shipping fee below that (₹)</label><input id="s-fee" type="number" min={0} className="input" value={s.shippingFee} onChange={numf("shippingFee")} /></div>
-        <label className="flex items-center gap-3 self-end pb-3 text-sm"><input type="checkbox" checked={s.codEnabled} onChange={(e) => setS({ ...s, codEnabled: e.target.checked })} className="h-4 w-4 accent-[#1a1a1a]" /> Offer cash on delivery</label>
-        <div><label className="label" htmlFor="s-cod">Cash on delivery fee (₹)</label><input id="s-cod" type="number" min={0} className="input" value={s.codFee} onChange={numf("codFee")} /></div>
+        <h2 className="font-serif text-lg font-semibold sm:col-span-2">GST invoice details</h2>
+        <div><label className="label" htmlFor="s-legal">Business name on invoices</label><input id="s-legal" className="input" value={s.legalName} onChange={str("legalName")} /></div>
+        <div><label className="label" htmlFor="s-gstin">GSTIN</label><input id="s-gstin" className="input uppercase" maxLength={15} placeholder="22AAAAA0000A1Z5" value={s.gstin} onChange={str("gstin")} /></div>
+        <div><label className="label" htmlFor="s-state">Business state</label><input id="s-state" className="input" placeholder="Maharashtra" value={s.businessState} onChange={str("businessState")} /></div>
+        <div><label className="label" htmlFor="s-hsn">HSN code</label><input id="s-hsn" className="input" value={s.hsnCode} onChange={str("hsnCode")} /></div>
+        <div><label className="label" htmlFor="s-rate">GST rate (%)</label><input id="s-rate" type="number" min={0} max={40} step="0.5" className="input" value={s.gstRate} onChange={numf("gstRate")} /></div>
+        <p className="text-xs text-muted sm:col-span-2">Prices on the website include GST. Invoices show the taxable value and CGST + SGST (same state) or IGST (other states).</p>
       </section>
       <section className={sec}>
         <h2 className="font-serif text-lg font-semibold sm:col-span-2">Gift box</h2>
-        <label className="flex items-center gap-3 self-end pb-3 text-sm"><input type="checkbox" checked={s.giftBoxEnabled} onChange={(e) => setS({ ...s, giftBoxEnabled: e.target.checked })} className="h-4 w-4 accent-[#1a1a1a]" /> Let customers add a gift box and note</label>
+        <label className="flex items-center gap-3 self-end pb-3 text-sm"><input type="checkbox" checked={s.giftBoxEnabled} onChange={(e) => setS({ ...s, giftBoxEnabled: e.target.checked })} className="h-4 w-4 accent-[#241f1a]" /> Let customers add a gift box and note</label>
         <div><label className="label" htmlFor="s-gift">Gift box price (₹, 0 = free)</label><input id="s-gift" type="number" min={0} className="input" value={s.giftBoxFee} onChange={numf("giftBoxFee")} /></div>
         <div className="sm:col-span-2"><label className="label" htmlFor="s-gimg">Gift box photo link</label><input id="s-gimg" className="input" placeholder="https://…" value={s.giftBoxImage} onChange={str("giftBoxImage")} /></div>
       </section>

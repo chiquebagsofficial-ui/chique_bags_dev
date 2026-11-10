@@ -134,7 +134,7 @@ async function main() {
           title: "Wrapped with *love*",
           subtitle: "Add a gift box and a handwritten note to any bag. One tap at checkout.",
           ctaText: "Explore gifting", ctaHref: "/gifting",
-          image: images.site["banner-gifting"], focus: "center", theme: "dark", sortOrder: 2,
+          image: images.site["banner-gifting"], focus: "center", theme: "light", sortOrder: 2,
         },
         {
           eyebrow: "Bestsellers",
@@ -147,14 +147,25 @@ async function main() {
     });
   }
 
+  // Refresh banners that still use one of our seeded stock photos (the owner's own uploads are never touched).
+  for (const b of await prisma.banner.findMany()) {
+    const m = b.image.match(/chique-bags\/stock\/(banner-[a-z-]+)/);
+    const fresh = m && images.site[m[1]];
+    if (fresh && fresh !== b.image) await prisma.banner.update({ where: { id: b.id }, data: { image: fresh, ...(m[1] === "banner-gifting" ? { theme: "light" } : {}) } });
+  }
+
   // Site photos. Replace an empty value or the old illustrated placeholder; keep anything the owner chose.
   for (const [key, url] of [["giftBoxImage", images.site["gift-box"]], ["storyImage", images.site["story"]]] as const) {
     if (!url) continue;
     const row = await prisma.setting.findUnique({ where: { key } });
-    if (!row || !row.value || row.value.includes("chique-bags/seed/")) {
+    if (!row || !row.value || row.value.includes("chique-bags/seed/") || row.value.includes("chique-bags/stock/gift-box")) {
       await prisma.setting.upsert({ where: { key }, create: { key, value: url }, update: { value: url } });
     }
   }
+
+  // Gift box price is Rs 200. Fix the earlier default (149) but keep any other value the owner chose.
+  const gift = await prisma.setting.findUnique({ where: { key: "giftBoxFee" } });
+  if (!gift || gift.value === "149") await prisma.setting.upsert({ where: { key: "giftBoxFee" }, create: { key: "giftBoxFee", value: "200" }, update: { value: "200" } });
 
   console.log(`Seed complete. Admin: ${adminEmail}. ${products.length} products.`);
 }

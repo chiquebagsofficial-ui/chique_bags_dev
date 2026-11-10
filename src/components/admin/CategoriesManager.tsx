@@ -47,7 +47,7 @@ export default function CategoriesManager({ categories }: { categories: Cat[] })
           <div><label className="label" htmlFor="ct-order">Display order (lower shows first)</label><input id="ct-order" type="number" min={0} className="input" value={f.sortOrder} onChange={(e) => setF({ ...f, sortOrder: Number(e.target.value) })} /></div>
           <div className="sm:col-span-2"><label className="label" htmlFor="ct-desc">Description</label><input id="ct-desc" className="input" value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></div>
           <div className="sm:col-span-2"><label className="label" htmlFor="ct-img">Cover image link</label><input id="ct-img" type="url" placeholder="https://…" className="input" value={f.image} onChange={(e) => setF({ ...f, image: e.target.value })} /></div>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.isActive} onChange={(e) => setF({ ...f, isActive: e.target.checked })} className="accent-[#1a1a1a]" /> Visible in the store</label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.isActive} onChange={(e) => setF({ ...f, isActive: e.target.checked })} className="accent-[#241f1a]" /> Visible in the store</label>
           {error && <p role="alert" className="rounded-sm bg-blush p-3 text-sm font-medium text-berry sm:col-span-2">{error}</p>}
           <div className="flex gap-3 sm:col-span-2"><button className="btn btn-dark btn-sm" disabled={busy}>{busy ? "Saving…" : "Save category"}</button><button type="button" className="btn btn-line btn-sm" onClick={() => setEditing(null)}>Cancel</button></div>
         </form>

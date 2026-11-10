@@ -1,15 +1,36 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Instagram } from "@/components/icons";
 import NewsletterForm from "@/components/layout/NewsletterForm";
 import type { Settings } from "@/lib/settings";
 
-export default function Footer({ settings, categories }: { settings: Settings; categories: { name: string; slug: string }[] }) {
+export default function Footer({ settings, categories, picks }: { settings: Settings; categories: { name: string; slug: string }[]; picks: { id: string; name: string; image: string }[] }) {
   const link = "text-[0.88rem] text-white/65 transition hover:text-white";
   return (
     <footer className="mt-28">
+      {/* Instagram-style strip of our bestselling bags */}
+      {picks.length > 0 && (
+        <section aria-label="Follow us on Instagram">
+          <div className="wrap mb-8 text-center">
+            <p className="eyebrow">Our bestsellers on Instagram</p>
+            <h2 className="h-display mt-3 text-3xl sm:text-4xl">
+              <a href={settings.instagram} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 hover:text-berry"><Instagram size={26} /> @chiquebagsofficial</a>
+            </h2>
+          </div>
+          <div className="grid grid-cols-3 lg:grid-cols-6">
+            {picks.map((p) => (
+              <a key={p.id} href={settings.instagram} target="_blank" rel="noopener noreferrer" className="group relative aspect-square overflow-hidden bg-cream">
+                <Image src={p.image} alt={`${p.name} on Instagram`} fill sizes="(min-width:1024px) 17vw, 33vw" className="object-cover transition duration-700 group-hover:scale-105" />
+                <span className="absolute inset-0 grid place-items-center bg-ink/0 text-white opacity-0 transition group-hover:bg-ink/40 group-hover:opacity-100"><Instagram size={26} /></span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* newsletter */}
-      <section className="bg-blush">
+      <section className="mt-20 bg-blush">
         <div className="wrap py-16 text-center lg:py-20">
           <p className="eyebrow">The Chique list</p>
           <h2 className="h-display mt-4 text-3xl sm:text-5xl">New drops, first</h2>
@@ -65,7 +86,7 @@ export default function Footer({ settings, categories }: { settings: Settings; c
         <div className="border-t border-white/10">
           <div className="wrap flex flex-col justify-between gap-2 py-6 text-[0.72rem] uppercase tracking-[0.18em] text-white/45 sm:flex-row">
             <p>© {new Date().getFullYear()} Chique Bags</p>
-            <p>UPI · Cards · Net banking · Cash on delivery</p>
+            <p>Prepaid orders · UPI · Cards · Net banking</p>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ChevronDown, Gift, RotateCcw, ShieldCheck, Star, Truck } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons";
 import ProductBuyBox from "@/components/store/ProductBuyBox";
 import ProductCard from "@/components/store/ProductCard";
 import ProductGallery from "@/components/store/ProductGallery";
@@ -74,7 +75,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     { title: "Description", body: product.description },
     { title: "Details", list: [...product.features, product.material && `Material: ${product.material}`, product.dimensions && `Size: ${product.dimensions}`].filter(Boolean) as string[] },
     { title: "Care", body: product.careInstructions },
-    { title: "Shipping & exchange", body: `Free shipping on orders above ${formatINR(settings.freeShippingThreshold)}; otherwise ${formatINR(settings.shippingFee)}. Delivered in 3–5 working days across India. Easy 7-day exchange for wrong or defective items.` },
+    { title: "Shipping & exchange", body: "Free shipping on every order. Delivered in 3–5 working days across India. If your bag arrives damaged or defective, report it within 7 days for an exchange or refund." },
   ].filter((d) => d.body || d.list?.length);
 
   return (
@@ -112,11 +113,22 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             />
           </div>
 
+          {settings.whatsapp && (
+            <a
+              href={`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(`Hi Chique Bags, I'd like to know more about ${product.name} (${formatINR(product.price)}): ${appUrl(`/products/${product.slug}`)}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 flex items-center justify-center gap-2.5 border border-[#25D366] py-3.5 text-[0.72rem] font-medium uppercase tracking-[0.2em] text-[#128C7E] transition hover:bg-[#25D366] hover:text-white"
+            >
+              <WhatsAppIcon size={18} /> Enquire about this bag on WhatsApp
+            </a>
+          )}
+
           <ul className="mt-8 grid gap-3 rounded-sm bg-cream p-5 text-sm">
-            <li className="flex items-center gap-3"><Truck size={18} className="text-rose" /> Delivered in 3–5 days · Free above {formatINR(settings.freeShippingThreshold)}</li>
-            <li className="flex items-center gap-3"><RotateCcw size={18} className="text-rose" /> 7-day exchange for wrong or defective items</li>
+            <li className="flex items-center gap-3"><Truck size={18} className="text-rose" /> Free shipping on every order · Delivered in 3–5 days</li>
+            <li className="flex items-center gap-3"><RotateCcw size={18} className="text-rose" /> Damaged or defective? Refund or exchange within 7 days</li>
             {settings.giftBoxEnabled && <li className="flex items-center gap-3"><Gift size={18} className="text-rose" /> <span>Make it a gift: add a gift box &amp; note at checkout{settings.giftBoxFee > 0 ? ` (${formatINR(settings.giftBoxFee)})` : ""} · <Link href="/gifting" className="underline">Learn more</Link></span></li>}
-            <li className="flex items-center gap-3"><ShieldCheck size={18} className="text-rose" /> Secure payment · UPI, cards, net banking{settings.codEnabled && ", COD"}</li>
+            <li className="flex items-center gap-3"><ShieldCheck size={18} className="text-rose" /> Secure prepaid payment · UPI, cards, net banking</li>
           </ul>
 
           <div className="mt-6 divide-y divide-line border-y border-line">
@@ -143,7 +155,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <li key={r.id} className="py-5">
                 <div className="flex items-center gap-2">
                   <span className="flex" aria-label={`${r.rating} out of 5 stars`}>
-                    {[1, 2, 3, 4, 5].map((n) => <Star key={n} size={15} className={n <= r.rating ? "fill-gold text-gold" : "text-[#d6cfca]"} />)}
+                    {[1, 2, 3, 4, 5].map((n) => <Star key={n} size={15} className={n <= r.rating ? "fill-gold text-gold" : "text-[#d6cbb8]"} />)}
                   </span>
                   <span className="text-sm font-semibold">{r.user.name.split(" ")[0]}</span>
                   <span className="text-xs text-muted">{formatDate(r.createdAt)}</span>

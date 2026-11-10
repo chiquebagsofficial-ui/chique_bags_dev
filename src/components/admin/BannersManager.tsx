@@ -65,7 +65,7 @@ export default function BannersManager({ banners }: { banners: BannerRow[] }) {
   const imgBox = (key: "image" | "imageMobile", label: string, ratio: string) => (
     <div>
       <label className="label">{label}</label>
-      <button type="button" onClick={() => { target.current = key; fileRef.current?.click(); }} className={`relative grid w-full place-items-center overflow-hidden border-2 border-dashed border-[#e0d6d0] text-sm text-muted hover:border-rose ${ratio}`}>
+      <button type="button" onClick={() => { target.current = key; fileRef.current?.click(); }} className={`relative grid w-full place-items-center overflow-hidden border-2 border-dashed border-[#dccfb8] text-sm text-muted hover:border-rose ${ratio}`}>
         {f[key] ? <Image src={f[key]} alt="" fill sizes="300px" className="object-cover" /> : <span className="flex flex-col items-center gap-1"><ImagePlus size={22} />{uploading === key ? "Uploading…" : "Upload"}</span>}
       </button>
       <input className="input mt-2 !text-xs" placeholder="or paste an image link" value={f[key]} onChange={(e) => setF({ ...f, [key]: e.target.value })} aria-label={`${label} link`} />
@@ -104,7 +104,7 @@ export default function BannersManager({ banners }: { banners: BannerRow[] }) {
                 </select>
               </div>
             </div>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.isActive} onChange={(e) => setF({ ...f, isActive: e.target.checked })} className="accent-[#1a1a1a]" /> Show on the homepage</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.isActive} onChange={(e) => setF({ ...f, isActive: e.target.checked })} className="accent-[#241f1a]" /> Show on the homepage</label>
           </div>
           <div className="space-y-4">
             {imgBox("image", "Banner photo (wide, 16:9 works best)", "aspect-video")}

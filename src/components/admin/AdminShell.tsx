@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Images, LayoutDashboard, LogOut, Mail, Menu, Package, Settings, ShoppingCart, Tag, Tags, Users, X } from "lucide-react";
+import { Images, LayoutDashboard, LogOut, RotateCcw, Mail, Menu, Package, Settings, ShoppingCart, Tag, Tags, Users, X } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/admin/returns", label: "Returns", icon: RotateCcw },
   // { href: "/admin/banners", label: "Banners", icon: Images },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: Tags },
@@ -17,7 +18,7 @@ const NAV = [
   // { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
-export default function AdminShell({ adminName, unreadMessages, children }: { adminName: string; unreadMessages: number; children: React.ReactNode }) {
+export default function AdminShell({ adminName, unreadMessages, pendingReturns, children }: { adminName: string; unreadMessages: number; pendingReturns: number; children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -29,6 +30,7 @@ export default function AdminShell({ adminName, unreadMessages, children }: { ad
         return (
           <Link key={href} href={href} onClick={() => setOpen(false)} className={`flex items-center gap-3 rounded-sm px-4 py-2.5 text-sm font-medium transition ${active ? "bg-white/12 text-white" : "text-white/60 hover:bg-white/8 hover:text-white"}`}>
             <Icon size={18} /> {label}
+            {label === "Returns" && pendingReturns > 0 && <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-gold px-1.5 text-[0.65rem] font-bold text-white">{pendingReturns}</span>}
             {label === "Messages" && unreadMessages > 0 && <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-rose px-1.5 text-[0.65rem] font-bold text-white">{unreadMessages}</span>}
           </Link>
         );

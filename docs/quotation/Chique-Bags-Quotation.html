@@ -68,13 +68,13 @@
 
 <table>
   <tr><th style="width:24%">Area</th><th>Deliverable</th></tr>
-  <tr><td>Homepage</td><td>Full-width banner slider of two to three banners (for instance new collection, gifting and bestsellers), each with its own photograph, headline, text and buttons, with automatic sliding and swipe support on phones. Further sections: shop by style, bestsellers, new arrivals, brand story, gifting, an Instagram strip, a newsletter sign-up and a footer with contact and policy links. Product sections update automatically as the catalogue changes.</td></tr>
+  <tr><td>Homepage</td><td>Full-width banner slider of two to three banners (for instance new collection, gifting and bestsellers), each with its own photograph, headline, text and buttons, with automatic sliding and swipe support on phones. Further sections: shop by style, bestsellers, new arrivals, brand story, gifting, a newsletter sign-up and a footer that shows the brand's bestselling bags as an Instagram-style strip linking to its Instagram profile, together with contact and policy links. Product sections update automatically as the catalogue changes.</td></tr>
   <tr><td>Navigation</td><td>Announcement bar, sticky header with a Shop menu, search with live suggestions, favourites, account and bag, and a bottom navigation bar on phones.</td></tr>
   <tr><td>Catalogue</td><td>Shop page with category and price filters, in-stock filter, sorting and pagination, with shareable links. Product cards show sale, new, bestseller and sold-out tags, colour swatches, MRP, sale price and percentage saved.</td></tr>
   <tr><td>Product page</td><td>Photo gallery, colour selection with stock tracked per colour, low-stock notice, quantity selection, add to bag, buy now, description, details and care information, related products, and customer reviews with star ratings (open only to customers whose order has been delivered).</td></tr>
   <tr><td>Favourites</td><td>Heart button on every product. Favourites are kept on the device for visitors and saved to the account for logged-in customers, being merged on login.</td></tr>
-  <tr><td>Gifting</td><td>A dedicated Gifting page and homepage section featuring a photograph of the Chique Bags gift box. At checkout, a gift box and a handwritten note (up to 200 characters) may be added to any purchase at a fixed additional price.</td></tr>
-  <tr><td>Bag and checkout</td><td>Slide-out bag with a free-shipping progress bar and a full bag page. Checkout with a live order summary (total at MRP, discount, shipping, gift box and final total) and saved addresses. Customers may check out as a guest, verified by a one-time email code, or from a logged-in account. Payment by Razorpay (UPI, cards, net banking, wallets) or cash on delivery. If a price changes during checkout, the customer is shown the new total before paying.</td></tr>
+  <tr><td>Gifting</td><td>A dedicated Gifting page and homepage section featuring a photograph of the Chique Bags gift box. At checkout, a gift box and a handwritten note (up to 200 characters) may be added to any purchase for an additional ₹200.</td></tr>
+  <tr><td>Bag and checkout</td><td>Slide-out bag and a full bag page. Checkout with a live order summary (total at MRP, discount, shipping, gift box and final total) and saved addresses. Customers may check out as a guest, verified by a one-time email code, or from a logged-in account. Orders are prepaid only, paid through Razorpay (UPI, cards, net banking, wallets), and shipping is free on every order. If a price changes during checkout, the customer is shown the new total before paying.</td></tr>
   <tr><td>Customer account</td><td>Sign-up with email verification, login, password reset by email code, profile and saved addresses. Order history with a progress tracker, courier tracking link, invoice download and cancellation of orders that have not shipped. A public Track Order page accepts an order number and email address.</td></tr>
   <tr><td>Information pages</td><td>About, Contact (with a form), Shipping and Delivery, Returns and Exchange, Terms and Conditions, and Privacy Policy, including the business details required for payment-gateway approval.</td></tr>
 </table>
@@ -110,18 +110,33 @@
   <tr><td>Performance and accessibility</td><td>Automatic image resizing in modern formats, keyboard-friendly navigation, labelled controls and respect for the visitor's reduced-motion setting.</td></tr>
 </table>
 
+<h3>2.6 Additional features</h3>
+<p>The following features were requested after the original scope was agreed. They are charged separately, as itemised in Section 5.</p>
+<table>
+  <tr><th style="width:24%">Feature</th><th>Deliverable</th></tr>
+  <tr><td>WhatsApp integration</td><td>A floating WhatsApp chat button on every page, and an enquiry button on each product page that opens a WhatsApp chat pre-filled with the bag's name, price and link.</td></tr>
+  <tr><td>Pincode validation</td><td>The delivery pincode is checked at checkout and on saved addresses against India Post records, with the city and state filled in automatically. An invalid pincode cannot be ordered.</td></tr>
+  <tr><td>Returns and refunds</td><td>A customer may report a damaged, defective or wrong item within seven days of delivery, with photographs, from the order page. A Returns section in the administration panel tracks each request through requested, approved, item received and refunded (or rejected). A refund is issued through Razorpay, for the full or a partial amount, and its amount, reference, date, reason and the staff member responsible are recorded on both the request and the order. The Proprietor may also record a return or refund on a customer's behalf. Customers are emailed at each step.</td></tr>
+  <tr><td>GST invoices and order management</td><td>Tax invoices numbered per financial year, showing the seller's GSTIN and HSN code, taxable value, CGST and SGST (or IGST for other states), and the amount in words. The Proprietor can edit an order's contact and delivery details and keep private notes on it from the administration panel.</td></tr>
+  <tr><td>Initial product upload</td><td>The Developer enters the initial products, with prices, colours, stock and photographs, from the content supplied by the Client.</td></tr>
+  <tr><td>Extended support</td><td>Complimentary post-launch support for thirty (30) days instead of the standard two weeks (Section 6).</td></tr>
+</table>
+
 <h2>3. Technology and third-party services</h2>
 <p>The website is a custom build rather than a template, using the following technologies and services.</p>
 <table>
   <tr><th style="width:24%">Component</th><th>Technology</th></tr>
   <tr><td>Website</td><td>Next.js, React and TypeScript, styled with Tailwind CSS</td></tr>
   <tr><td>Database</td><td>PostgreSQL on Neon, accessed through Prisma</td></tr>
-  <tr><td>Payments</td><td>Razorpay, and cash on delivery</td></tr>
+  <tr><td>Payments</td><td>Razorpay (prepaid orders)</td></tr>
   <tr><td>Photographs</td><td>Cloudinary</td></tr>
   <tr><td>Email</td><td>SMTP email service</td></tr>
   <tr><td>Hosting</td><td>Vercel, with a custom domain</td></tr>
 </table>
 <p>These services are to be held in accounts owned by the Client. Their subscription fees, the domain registration fee and Razorpay's transaction charges are payable by the Client directly and do not form part of the quoted price.</p>
+
+<h3>3.1 Database backups and recovery</h3>
+<p>The database is hosted on Neon, a managed PostgreSQL service that keeps a continuous history of changes and can restore the database to an earlier point in time. The length of that history depends on the Neon plan chosen by the Client. The Developer will document the recovery procedure and can export an independent copy of the database on request. Photographs are stored on Cloudinary and the source code on GitHub, from which the website can be redeployed at any time.</p>
 
 <h2>4. Delivery of content</h2>
 <p>The website will be delivered with sample products and stock photographs so that the design may be reviewed. The Client's own product, banner and gift box photographs, product details and prices are to replace them before launch. Products, prices, stock and photographs may thereafter be updated at any time through the administration panel.</p>
@@ -136,8 +151,21 @@
   <tr class="total"><td colspan="2">Total</td><td class="num">₹10,000</td></tr>
 </table>
 
+<h3>Additional features</h3>
+<table>
+  <tr><th>Feature (Section 2.6)</th><th class="num">Amount</th></tr>
+  <tr><td>WhatsApp integration</td><td class="num">₹1,000</td></tr>
+  <tr><td>Pincode validation</td><td class="num">₹1,000</td></tr>
+  <tr><td>Returns and refunds</td><td class="num">₹4,000</td></tr>
+  <tr><td>GST invoices and order management</td><td class="num">₹2,000</td></tr>
+  <tr><td>Extended support (30 days)</td><td class="num">₹1,000</td></tr>
+  <tr><td>Initial product upload</td><td class="num">₹100 per product</td></tr>
+  <tr class="total"><td>Total for additional features (excluding product upload)</td><td class="num">₹9,000</td></tr>
+</table>
+<p>Additional features are payable together with the go-live instalment. Product upload is charged at the number of products actually entered.</p>
+
 <h2>6. Support and maintenance</h2>
-<p>Support is provided complimentary for the first two (2) weeks after go-live. Thereafter, maintenance is available at the Client's option at <strong>₹2,000 per month</strong>. It is optional, is charged only if the Client elects to continue, and may be discontinued at any time by notice to the Developer.</p>
+<p>Support is provided complimentary for the first thirty (30) days after go-live. Thereafter, maintenance is available at the Client's option at <strong>₹2,000 per month</strong>. It is optional, is charged only if the Client elects to continue, and may be discontinued at any time by notice to the Developer.</p>
 <table>
   <tr><th style="width:50%">Covered</th><th>Not covered</th></tr>
   <tr>
@@ -162,6 +190,7 @@
 <ul>
   <li>Product photographs, descriptions, prices and stock details, and the business details required for policy pages and invoices.</li>
   <li>Accounts for Razorpay (with KYC completed), Cloudinary, Vercel, Neon and an email service, together with a domain name.</li>
+  <li>The business details needed for invoices (legal name, GSTIN, address and state) and the WhatsApp number to be used.</li>
   <li>Feedback and approvals in good time, in particular the UI confirmation on which the second instalment depends.</li>
   <li>Payment of each instalment on the dates in Section 5.</li>
 </ul>

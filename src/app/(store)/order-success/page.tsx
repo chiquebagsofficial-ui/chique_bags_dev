@@ -17,7 +17,6 @@ export default async function OrderSuccessPage({ searchParams }: { searchParams:
   const order = await prisma.order.findFirst({ where: { id, userId: user.id }, include: { items: true } });
   if (!order) notFound();
   if (order.paymentMethod === "ONLINE" && order.paymentStatus !== "PAID") redirect(`/order-failed?id=${order.id}`);
-  const cod = order.paymentMethod === "COD";
 
   return (
     <div className="wrap max-w-2xl py-16 text-center">
@@ -43,7 +42,7 @@ export default async function OrderSuccessPage({ searchParams }: { searchParams:
         </ul>
         {order.giftBox && <p className="border-t border-line py-3 text-sm text-muted">Gift box included{order.giftNote ? <> · note: <em>“{order.giftNote}”</em></> : null}</p>}
         <div className="flex justify-between border-t border-line pt-4 text-lg font-semibold">
-          <span>{cod ? "To pay on delivery" : "Paid"}</span><span>{formatINR(order.total)}</span>
+          <span>Paid</span><span>{formatINR(order.total)}</span>
         </div>
       </div>
 

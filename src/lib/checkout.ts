@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { getRazorpay, isGatewayConfigured, isSimulatedPaymentAllowed } from "@/lib/razorpay";
 import { sendOrderCancelled, sendOrderConfirmation, sendOwnerNewOrder } from "@/lib/emails";
+import { ensureInvoiceNumber } from "@/lib/gst";
+import { lookupPincode } from "@/lib/pincode";
 import type { AddressInput } from "@/lib/validations";
 
 type Tx = Prisma.TransactionClient;
@@ -34,19 +36,17 @@ export type PriceResult =
       mrpTotal: number;
       discount: number;
       shipping: number;
-      codFee: number;
       giftFee: number;
       total: number;
       couponCode: string | null;
       couponError: string | null;
-      freeShippingThreshold: number;
     }
   | { ok: false; error: string; code?: string; variantId?: string };
 
 /** The server is the only source of truth for prices, discounts, shipping and stock. */
 export async function priceCart(
   items: CartLineInput[],
-  opts: { couponCode?: string | null; userId?: string | null; method?: "COD" | "ONLINE"; giftBox?: boolean } = {}
+  opts: { couponCode?: string | null; userId?: string | null; giftBox?: boolean } = {}
 ): Promise<PriceResult> {
   const merged = new Map<string, number>();
   for (const it of items) merged.set(it.variantId, (merged.get(it.variantId) ?? 0) + it.quantity);
@@ -103,10 +103,9 @@ export async function priceCart(
     }
   }
 
-  const shipping = subtotal >= settings.freeShippingThreshold ? 0 : settings.shippingFee;
-  const codFee = opts.method === "COD" ? settings.codFee : 0;
+  const shipping = 0; // free shipping on every order
   const giftFee = opts.giftBox && settings.giftBoxEnabled ? settings.giftBoxFee : 0;
-  const total = Math.max(0, subtotal - discount + shipping + codFee + giftFee);
+  const total = Math.max(0, subtotal - discount + shipping + giftFee);
 
   return {
     ok: true,
@@ -115,12 +114,10 @@ export async function priceCart(
     mrpTotal,
     discount,
     shipping,
-    codFee,
     giftFee,
     total,
     couponCode,
     couponError,
-    freeShippingThreshold: settings.freeShippingThreshold,
   };
 }
 
@@ -196,7 +193,6 @@ export interface CreateOrderInput {
   address: AddressInput;
   items: CartLineInput[];
   couponCode?: string | null;
-  method: "COD" | "ONLINE";
   expectedTotal?: number;
   giftBox?: boolean;
   giftNote?: string | null;
@@ -207,7 +203,7 @@ export type CreateOrderResult =
       ok: true;
       orderId: string;
       orderNumber: string;
-      method: "COD" | "ONLINE";
+      method: "ONLINE";
       razorpayOrderId?: string;
       amountPaise?: number;
       simulated?: boolean;
@@ -216,22 +212,24 @@ export type CreateOrderResult =
 
 export async function createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
   const settings = await getSettings();
-  if (input.method === "COD" && !settings.codEnabled) {
-    return { ok: false, status: 400, error: "Cash on delivery isn't available right now." };
-  }
-  if (input.method === "ONLINE" && !isGatewayConfigured() && !isSimulatedPaymentAllowed()) {
+  if (!isGatewayConfigured() && !isSimulatedPaymentAllowed()) {
     return { ok: false, status: 503, error: "Online payment is not available right now. Please try again later." };
   }
 
   if (input.giftBox && !settings.giftBoxEnabled) {
     return { ok: false, status: 400, error: "Gift boxes aren't available right now." };
   }
-  const priced = await priceCart(input.items, { couponCode: input.couponCode, userId: input.userId, method: input.method, giftBox: input.giftBox });
+  const priced = await priceCart(input.items, { couponCode: input.couponCode, userId: input.userId, giftBox: input.giftBox });
+
   if (!priced.ok) return { ok: false, status: 409, error: priced.error, code: priced.code };
   if (priced.couponError) return { ok: false, status: 400, error: priced.couponError, code: "COUPON" };
   if (input.expectedTotal !== undefined && input.expectedTotal !== priced.total) {
     return { ok: false, status: 409, code: "PRICE_CHANGED", total: priced.total, error: "Prices changed while you were checking out. Please review your new total." };
   }
+
+  // The pincode must exist. If the lookup service is down we accept a well-formed pincode.
+  const pin = await lookupPincode(input.address.pincode);
+  if (pin.status === "invalid") return { ok: false, status: 400, code: "PINCODE", error: "We couldn't find this pincode. Please check it and try again." };
 
   const addr = input.address;
   const shippingAddress = {
@@ -254,13 +252,13 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
         subtotal: priced.subtotal,
         mrpTotal: priced.mrpTotal,
         discount: priced.discount,
-        shipping: priced.shipping + priced.codFee,
+        shipping: priced.shipping,
         giftBox: Boolean(input.giftBox),
         giftFee: priced.giftFee,
         giftNote: input.giftBox ? input.giftNote?.trim() || null : null,
         total: priced.total,
         couponCode: priced.couponCode,
-        paymentMethod: input.method,
+        paymentMethod: "ONLINE",
         paymentStatus: "UNPAID",
         customerName: input.name,
         customerEmail: input.email,
@@ -282,22 +280,6 @@ export async function createOrder(input: CreateOrderInput): Promise<CreateOrderR
       include: { items: true },
     });
   });
-
-  if (input.method === "COD") {
-    try {
-      await prisma.$transaction(async (tx) => {
-        await deductStock(tx, order.items);
-        await tx.order.update({ where: { id: order.id }, data: { status: "CONFIRMED", stockDeducted: true } });
-        await redeemCoupon(tx, order);
-      });
-    } catch (err) {
-      await prisma.order.delete({ where: { id: order.id } }).catch(() => null);
-      if (err instanceof StockError) return { ok: false, status: 409, code: "STOCK", error: `${err.itemName} just sold out.` };
-      throw err;
-    }
-    void notifyNewOrder(order.id);
-    return { ok: true, orderId: order.id, orderNumber: order.orderNumber, method: "COD" };
-  }
 
   // Online payment: create the gateway order, stock is taken once payment is verified.
   const amountPaise = priced.total * 100;
@@ -363,7 +345,10 @@ export async function confirmOnlinePayment(orderId: string, razorpayPaymentId: s
     return { ok: true as const, alreadyPaid: false, soldOut: false };
   });
 
-  if (result.ok && !result.alreadyPaid) void notifyNewOrder(orderId);
+  if (result.ok && !result.alreadyPaid) {
+    void ensureInvoiceNumber(orderId).catch((e) => console.error("invoice number failed", e));
+    void notifyNewOrder(orderId);
+  }
   return result;
 }
 

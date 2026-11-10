@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-ink: #1c1819;
-  --color-rose: #d8899f;
-  --color-rose-soft: #f2bac9;
-  --color-blush: #fdf5f7;
-  --color-gold: #b8935f;
-  --color-cream: #f8f4f0;
-  --color-line: #ebe3de;
-  --color-muted: #6f6669;
-  --color-berry: #a63d63;
+  --color-ink: #241f1a;
+  --color-rose: #b08d57;
+  --color-rose-soft: #e8d6b0;
+  --color-blush: #faf6ee;
+  --color-gold: #9b7b44;
+  --color-cream: #f4ede2;
+  --color-line: #e6dccb;
+  --color-muted: #766b5f;
+  --color-berry: #7d5f32;
   --font-sans: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-cormorant), Georgia, serif;
 }
@@ -113,7 +113,7 @@ body {
 
   .input {
     width: 100%;
-    border: 1px solid #ddd2cb;
+    border: 1px solid #dcd0bb;
     background: #fff;
     border-radius: 0;
     padding: 13px 14px;
@@ -121,7 +121,7 @@ body {
     transition: border-color 0.2s;
   }
   .input:focus { outline: none; border-color: var(--color-ink); }
-  .input::placeholder { color: #a79d98; }
+  .input::placeholder { color: #a89d8c; }
   .label {
     display: block;
     font-size: 0.7rem;
@@ -129,7 +129,7 @@ body {
     letter-spacing: 0.14em;
     text-transform: uppercase;
     margin-bottom: 7px;
-    color: #4a4244;
+    color: #4a4036;
   }
 
   .card {

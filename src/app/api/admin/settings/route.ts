@@ -6,10 +6,6 @@ export const dynamic = "force-dynamic";
 
 const schema = z.object({
   announcement: z.string().trim().max(200),
-  freeShippingThreshold: z.number().int().min(0),
-  shippingFee: z.number().int().min(0),
-  codEnabled: z.boolean(),
-  codFee: z.number().int().min(0),
   giftBoxEnabled: z.boolean(),
   giftBoxFee: z.number().int().min(0),
   giftBoxImage: z.string().trim().max(400),
@@ -20,6 +16,11 @@ const schema = z.object({
   instagram: z.string().trim().max(200),
   address: z.string().trim().max(240),
   ownerEmail: z.string().trim().email().or(z.literal("")),
+  legalName: z.string().trim().max(120),
+  gstin: z.string().trim().toUpperCase().regex(/^$|^\d{2}[A-Z]{5}\d{4}[A-Z][A-Z\d]Z[A-Z\d]$/, "Enter a valid 15-character GSTIN"),
+  gstRate: z.number().min(0).max(40),
+  hsnCode: z.string().trim().max(10),
+  businessState: z.string().trim().max(60),
 });
 
 export async function PUT(req: Request) {
@@ -30,10 +31,6 @@ export async function PUT(req: Request) {
   const d = parsed.data;
   await saveSettings({
     announcement: d.announcement,
-    freeShippingThreshold: String(d.freeShippingThreshold),
-    shippingFee: String(d.shippingFee),
-    codEnabled: String(d.codEnabled),
-    codFee: String(d.codFee),
     giftBoxEnabled: String(d.giftBoxEnabled),
     giftBoxFee: String(d.giftBoxFee),
     giftBoxImage: d.giftBoxImage,
@@ -44,6 +41,11 @@ export async function PUT(req: Request) {
     instagram: d.instagram,
     address: d.address,
     ownerEmail: d.ownerEmail,
+    legalName: d.legalName,
+    gstin: d.gstin,
+    gstRate: String(d.gstRate),
+    hsnCode: d.hsnCode,
+    businessState: d.businessState,
   });
   return ok();
 }

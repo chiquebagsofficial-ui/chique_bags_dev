@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Hand, RotateCcw, ShieldCheck, Truck } from "lucide-react";
-import { Instagram } from "@/components/icons";
 import GiftSection from "@/components/store/GiftSection";
 import HeroBanners from "@/components/store/HeroBanners";
 import ProductCard from "@/components/store/ProductCard";
@@ -30,7 +29,6 @@ export default async function HomePage() {
     getCards({ isBestSeller: true }, 4, { createdAt: "desc" }),
     getCards({}, 4, { createdAt: "desc" }),
   ]);
-  const lookbook = [...arrivals, ...bestsellers].filter((p, i, a) => p.image && a.findIndex((x) => x.id === p.id) === i).slice(0, 6);
 
   return (
     <>
@@ -51,9 +49,9 @@ export default async function HomePage() {
         <div className="wrap grid grid-cols-2 lg:grid-cols-4">
           {[
             [Hand, "Handcrafted", "Made in small batches in India"],
-            [Truck, `Free shipping ${formatINR(settings.freeShippingThreshold)}+`, "Delivered in 3 to 5 days"],
-            [RotateCcw, "Easy exchange", "Within 7 days of delivery"],
-            [ShieldCheck, "Secure payment", "UPI, cards and cash on delivery"],
+            [Truck, "Free shipping", "On every order, 3 to 5 days"],
+            [RotateCcw, "Easy returns", "Refund or exchange within 7 days"],
+            [ShieldCheck, "Secure payment", "UPI, cards and net banking"],
           ].map(([Icon, t, s], i) => {
             const I = Icon as typeof Hand;
             return (
@@ -133,26 +131,6 @@ export default async function HomePage() {
             {arrivals.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
           <div className="mt-14 text-center"><Link href="/shop?sort=newest" className="btn btn-line">Shop new arrivals</Link></div>
-        </section>
-      )}
-
-      {/* Instagram */}
-      {lookbook.length > 0 && (
-        <section className="pt-28">
-          <div className="wrap mb-10 text-center">
-            <p className="eyebrow">Follow along</p>
-            <h2 className="h-display mt-4 text-3xl sm:text-4xl">
-              <a href={settings.instagram} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 hover:text-berry"><Instagram size={26} /> @chiquebagsofficial</a>
-            </h2>
-          </div>
-          <div className="grid grid-cols-3 lg:grid-cols-6">
-            {lookbook.map((p) => (
-              <a key={p.id} href={settings.instagram} target="_blank" rel="noopener noreferrer" className="group relative aspect-square overflow-hidden bg-cream">
-                <Image src={p.image!} alt={`${p.name} on Instagram`} fill sizes="(min-width:1024px) 17vw, 33vw" className="object-cover transition duration-700 group-hover:scale-105" />
-                <span className="absolute inset-0 grid place-items-center bg-ink/0 text-white opacity-0 transition group-hover:bg-ink/35 group-hover:opacity-100"><Instagram size={26} /></span>
-              </a>
-            ))}
-          </div>
         </section>
       )}
     </>

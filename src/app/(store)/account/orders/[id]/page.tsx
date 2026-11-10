@@ -4,9 +4,12 @@ import { notFound } from "next/navigation";
 import { Gift } from "lucide-react";
 import type { Metadata } from "next";
 import { CancelOrderButton } from "@/components/store/AccountForms";
+import ReturnRequestForm from "@/components/store/ReturnRequestForm";
+import ReturnTimeline, { ReturnStatusBadge } from "@/components/store/ReturnTimeline";
 import StatusBadge, { OrderProgress } from "@/components/store/StatusBadge";
 import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { canRequestReturn, OPEN_STATUSES, REASON_LABEL, returnDeadline } from "@/lib/returns";
 import { formatDate, formatINR } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Order details", robots: { index: false } };
@@ -15,11 +18,13 @@ export const dynamic = "force-dynamic";
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = (await getSessionUser())!;
-  const order = await prisma.order.findFirst({ where: { id, userId: user.id }, include: { items: { include: { product: { select: { slug: true } } } } } });
+  const order = await prisma.order.findFirst({ where: { id, userId: user.id }, include: { items: { include: { product: { select: { slug: true } } } }, returns: { include: { events: { orderBy: { createdAt: "asc" } } }, orderBy: { createdAt: "desc" } } } });
   if (!order) notFound();
   const a = order.shippingAddress as Record<string, string>;
   const canCancel = ["PENDING", "CONFIRMED", "PROCESSING"].includes(order.status);
-  const paid = order.paymentStatus === "PAID";
+  const paid = order.paymentStatus === "PAID" || order.paymentStatus === "PARTIALLY_REFUNDED" || order.paymentStatus === "REFUNDED";
+  const hasOpenReturn = order.returns.some((r) => OPEN_STATUSES.includes(r.status));
+  const returnable = canRequestReturn(order) && !hasOpenReturn;
 
   return (
     <div className="max-w-4xl">
@@ -64,7 +69,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <div className="flex justify-between"><span className="text-muted">Shipping</span><span>{order.shipping ? formatINR(order.shipping) : "Free"}</span></div>
             {order.giftBox && <div className="flex justify-between"><span className="text-muted">Gift box &amp; note</span><span>{order.giftFee ? formatINR(order.giftFee) : "Free"}</span></div>}
             <div className="flex justify-between border-t border-line pt-3 text-base font-semibold"><span>Total</span><span>{formatINR(order.total)}</span></div>
-            <p className="pt-1 text-xs text-muted">{order.paymentMethod === "COD" ? (paid ? "Cash on delivery · paid" : "Cash on delivery · pay on arrival") : paid ? "Paid online" : order.paymentStatus === "REFUNDED" ? "Refunded" : "Awaiting payment"}</p>
+            <p className="pt-1 text-xs text-muted">{order.paymentStatus === "REFUNDED" ? "Refunded in full" : order.paymentStatus === "PARTIALLY_REFUNDED" ? `Paid online · ${formatINR(order.refundedAmount)} refunded` : paid ? "Paid online" : "Awaiting payment"}</p>
           </section>
           <section className="card p-6 text-sm">
             <h3 className="mb-2 font-serif text-lg font-semibold">Delivering to</h3>
@@ -76,8 +81,30 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               <p className="text-muted">{order.giftNote ? <>Your note: <em>“{order.giftNote}”</em></> : "Packed in our gift box."}</p>
             </section>
           )}
+          {(order.returns.length > 0 || returnable || order.status === "DELIVERED") && (
+            <section className="card space-y-4 p-6 text-sm">
+              <h3 className="font-serif text-lg font-semibold">Returns &amp; refunds</h3>
+              {order.returns.map((r) => (
+                <div key={r.id} className="space-y-3 border-t border-line pt-4 first:border-0 first:pt-0">
+                  <div className="flex items-center justify-between gap-3">
+                    <div><p className="font-medium">{r.number}</p><p className="text-xs text-muted">{REASON_LABEL[r.reason]}</p></div>
+                    <ReturnStatusBadge status={r.status} />
+                  </div>
+                  {r.refundAmount > 0 && <p className="bg-cream p-3 text-xs">Refunded <strong>{formatINR(r.refundAmount)}</strong> to your original payment method. It can take 5 to 7 working days to appear.</p>}
+                  <ReturnTimeline events={r.events} />
+                </div>
+              ))}
+              {returnable && (
+                <>
+                  <p className="text-xs text-muted">Received a damaged, defective or wrong item? You can report it until {formatDate(returnDeadline(order))}.</p>
+                  <ReturnRequestForm orderId={order.id} items={order.items.map((i) => ({ id: i.id, name: i.name, variantName: i.variantName, quantity: i.quantity, price: i.price }))} />
+                </>
+              )}
+              {!returnable && order.returns.length === 0 && <p className="text-xs text-muted">The 7-day window to report a problem for this order has ended.</p>}
+            </section>
+          )}
           <div className="flex flex-wrap items-start gap-3">
-            {paid || order.paymentMethod === "COD" ? <Link href={`/account/orders/${order.id}/invoice`} target="_blank" className="btn btn-line btn-sm">Invoice</Link> : null}
+            {paid ? <Link href={`/account/orders/${order.id}/invoice`} target="_blank" className="btn btn-line btn-sm">Invoice</Link> : null}
             {canCancel && <CancelOrderButton orderId={order.id} />}
           </div>
         </div>

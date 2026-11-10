@@ -35,9 +35,9 @@ export const PRODUCT_PHOTOS = {
 // site imagery
 export const SITE_PHOTOS = {
   "banner-new-season": "1523779105320-d1cd346ff52b",
-  "banner-gifting": "1646182504823-a02b768e28b5",
+  "banner-gifting": "1513885045260-6b3086b24c17",
   "banner-collection": "1785153255448-3961697009f9",
-  "gift-box": "1513201099705-a9746e1e201f",
+  "gift-box": "1672853827236-e2ccf90761a1",
   story: "1524498250077-390f9e378fc0",
   "category-crossbody": "1760624294514-ca40aafe3d96",
 };

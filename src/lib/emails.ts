@@ -6,28 +6,28 @@ import { appUrl, escapeHtml as e, formatINR } from "@/lib/utils";
 type OrderWithItems = Order & { items: OrderItem[] };
 
 function layout(title: string, body: string): string {
-  return `<!doctype html><html><body style="margin:0;background:#faf7f5;font-family:Helvetica,Arial,sans-serif;color:#1a1a1a">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#faf7f5;padding:24px 12px"><tr><td align="center">
-<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid #f1ece9;border-radius:14px;overflow:hidden">
-<tr><td style="background:#141414;padding:22px 28px;text-align:center">
+  return `<!doctype html><html><body style="margin:0;background:#f7f1e6;font-family:Helvetica,Arial,sans-serif;color:#241f1a">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f1e6;padding:24px 12px"><tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid #e6dccb;border-radius:14px;overflow:hidden">
+<tr><td style="background:#241f1a;padding:22px 28px;text-align:center">
 <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;letter-spacing:1px;color:#ffffff">Chique Bags</span></td></tr>
 <tr><td style="padding:30px 28px 10px"><h1 style="font-family:Georgia,serif;font-size:22px;margin:0 0 14px;font-weight:600">${e(title)}</h1>${body}</td></tr>
-<tr><td style="padding:18px 28px 28px;color:#6b7280;font-size:12px;line-height:1.6;border-top:1px solid #f1ece9">
+<tr><td style="padding:18px 28px 28px;color:#6b7280;font-size:12px;line-height:1.6;border-top:1px solid #e6dccb">
 Handcrafted bags made with love in India.<br>Questions? Just reply to this email.</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
 const p = (t: string) => `<p style="font-size:15px;line-height:1.65;margin:0 0 14px">${t}</p>`;
 const button = (href: string, label: string) =>
-  `<p style="margin:22px 0"><a href="${e(href)}" style="background:#d8899f;color:#ffffff;text-decoration:none;padding:13px 26px;border-radius:999px;font-weight:600;font-size:14px;display:inline-block">${e(label)}</a></p>`;
+  `<p style="margin:22px 0"><a href="${e(href)}" style="background:#b08d57;color:#ffffff;text-decoration:none;padding:13px 26px;border-radius:999px;font-weight:600;font-size:14px;display:inline-block">${e(label)}</a></p>`;
 
 function itemsTable(order: OrderWithItems): string {
   const rows = order.items
     .map(
       (i) => `<tr>
-<td style="padding:10px 0;border-bottom:1px solid #f1ece9;font-size:14px">${e(i.name)}${i.variantName ? `<br><span style="color:#6b7280;font-size:12px">${e(i.variantName)}</span>` : ""}</td>
-<td style="padding:10px 8px;border-bottom:1px solid #f1ece9;font-size:14px;text-align:center">× ${i.quantity}</td>
-<td style="padding:10px 0;border-bottom:1px solid #f1ece9;font-size:14px;text-align:right">${formatINR(i.price * i.quantity)}</td></tr>`
+<td style="padding:10px 0;border-bottom:1px solid #e6dccb;font-size:14px">${e(i.name)}${i.variantName ? `<br><span style="color:#6b7280;font-size:12px">${e(i.variantName)}</span>` : ""}</td>
+<td style="padding:10px 8px;border-bottom:1px solid #e6dccb;font-size:14px;text-align:center">× ${i.quantity}</td>
+<td style="padding:10px 0;border-bottom:1px solid #e6dccb;font-size:14px;text-align:right">${formatINR(i.price * i.quantity)}</td></tr>`
     )
     .join("");
   const line = (label: string, value: string, bold = false) =>
@@ -42,7 +42,7 @@ ${line("Total", formatINR(order.total), true)}</table>`;
 
 function giftBlock(order: Order): string {
   if (!order.giftBox) return "";
-  return `<p style="font-size:14px;line-height:1.6;margin:0 0 14px;background:#fdf5f7;border-radius:10px;padding:12px 14px"><strong>Gift box included</strong>${order.giftNote ? `<br>Note card: <em>“${e(order.giftNote)}”</em>` : ""}</p>`;
+  return `<p style="font-size:14px;line-height:1.6;margin:0 0 14px;background:#f6efe3;border-radius:10px;padding:12px 14px"><strong>Gift box included</strong>${order.giftNote ? `<br>Note card: <em>“${e(order.giftNote)}”</em>` : ""}</p>`;
 }
 
 function addressBlock(order: Order): string {
@@ -81,15 +81,12 @@ export async function sendWelcome(name: string, email: string) {
 }
 
 export async function sendOrderConfirmation(order: OrderWithItems) {
-  const cod = order.paymentMethod === "COD";
   await sendMail({
     to: order.customerEmail,
     subject: `Order ${order.orderNumber} confirmed`,
     html: layout(
       "Thank you for your order",
-      p(`Hi ${e(order.customerName.split(" ")[0])}, we've received order <strong>${e(order.orderNumber)}</strong>. ${
-        cod ? "You'll pay in cash when it's delivered." : "Your payment was successful."
-      }`) +
+      p(`Hi ${e(order.customerName.split(" ")[0])}, we've received order <strong>${e(order.orderNumber)}</strong>. Your payment was successful.`) +
         itemsTable(order) +
         p("<strong>Delivering to</strong>") +
         addressBlock(order) +
@@ -147,9 +144,7 @@ export async function sendOwnerNewOrder(order: OrderWithItems) {
     subject: `New order ${order.orderNumber} (${formatINR(order.total)})`,
     html: layout(
       "You have a new order",
-      p(`<strong>${e(order.customerName)}</strong> (${e(order.customerEmail)}, ${e(order.customerPhone)}) placed order <strong>${e(order.orderNumber)}</strong>, paid by ${
-        order.paymentMethod === "COD" ? "cash on delivery" : "online payment"
-      }.`) +
+      p(`<strong>${e(order.customerName)}</strong> (${e(order.customerEmail)}, ${e(order.customerPhone)}) placed order <strong>${e(order.orderNumber)}</strong>, paid online.`) +
         itemsTable(order) +
         addressBlock(order) +
         giftBlock(order) +
@@ -168,7 +163,7 @@ export async function sendContactMessage(msg: { name: string; email: string; pho
     html: layout(
       "New contact message",
       p(`<strong>${e(msg.name)}</strong> &lt;${e(msg.email)}&gt;${msg.phone ? ` · ${e(msg.phone)}` : ""}`) +
-        `<p style="white-space:pre-wrap;font-size:15px;line-height:1.65;background:#faf7f5;padding:14px;border-radius:10px">${e(msg.message)}</p>`
+        `<p style="white-space:pre-wrap;font-size:15px;line-height:1.65;background:#f7f1e6;padding:14px;border-radius:10px">${e(msg.message)}</p>`
     ),
   });
   await sendMail({
@@ -176,4 +171,65 @@ export async function sendContactMessage(msg: { name: string; email: string; pho
     subject: "We got your message",
     html: layout("Thanks for reaching out", p(`Hi ${e(msg.name.split(" ")[0])}, we've received your message and will reply within one working day.`)),
   });
+}
+
+// ─── Returns & refunds ──────────────────────────────────────────────────
+
+type ReturnLike = { number: string; reason: string; refundAmount: number; details: string };
+
+export async function sendReturnReceived(order: Order, ret: ReturnLike, byStore: boolean) {
+  const s = await getSettings();
+  if (!byStore) {
+    await sendMail({
+      to: order.customerEmail,
+      subject: `We received your request ${ret.number}`,
+      html: layout(
+        "We've received your request",
+        p(`Hi ${e(order.customerName.split(" ")[0])}, we're sorry your bag wasn't right. Your request <strong>${e(ret.number)}</strong> for order <strong>${e(order.orderNumber)}</strong> is with our team, and we'll update you within one working day.`) +
+          button(appUrl(`/account/orders/${order.id}`), "View your request")
+      ),
+    });
+  }
+  if (s.ownerEmail) {
+    await sendMail({
+      to: s.ownerEmail,
+      subject: `${byStore ? "Return recorded" : "New return request"} ${ret.number} (${order.orderNumber})`,
+      html: layout(
+        byStore ? "Return recorded" : "New return request",
+        p(`<strong>${e(order.customerName)}</strong> · order <strong>${e(order.orderNumber)}</strong> · reason: ${e(ret.reason.replace(/_/g, " ").toLowerCase())}`) +
+          `<p style="white-space:pre-wrap;font-size:15px;line-height:1.6;background:#f8f2e9;padding:14px">${e(ret.details)}</p>` +
+          button(appUrl("/admin/returns"), "Open returns")
+      ),
+    });
+  }
+}
+
+export async function sendReturnUpdate(order: Order, ret: ReturnLike, status: string, note?: string, amount?: number) {
+  const first = e(order.customerName.split(" ")[0]);
+  const noteHtml = note ? p(`<em>${e(note)}</em>`) : "";
+  const content: Record<string, { subject: string; title: string; body: string } | undefined> = {
+    APPROVED: {
+      subject: `Request ${ret.number} approved`,
+      title: "Your request has been approved",
+      body: p(`Hi ${first}, we've approved request <strong>${e(ret.number)}</strong>. Our team will contact you shortly about the next step.`) + noteHtml,
+    },
+    REJECTED: {
+      subject: `Update on request ${ret.number}`,
+      title: "About your request",
+      body: p(`Hi ${first}, after reviewing request <strong>${e(ret.number)}</strong> we're unable to approve it.`) + noteHtml + p("If you'd like us to take another look, just reply to this email."),
+    },
+    RECEIVED: {
+      subject: `We received your return ${ret.number}`,
+      title: "We've received your item",
+      body: p(`Hi ${first}, your item for request <strong>${e(ret.number)}</strong> has reached us. We'll process your refund shortly.`) + noteHtml,
+    },
+    REFUNDED: {
+      subject: `Refund of ${formatINR(amount ?? ret.refundAmount)} issued`,
+      title: "Your refund has been issued",
+      body: p(`Hi ${first}, we've refunded <strong>${formatINR(amount ?? ret.refundAmount)}</strong> for request <strong>${e(ret.number)}</strong> to your original payment method. It usually appears within 5 to 7 working days.`) + noteHtml,
+    },
+  };
+  const c = content[status];
+  if (!c) return;
+  await sendMail({ to: order.customerEmail, subject: c.subject, html: layout(c.title, c.body + button(appUrl(`/account/orders/${order.id}`), "View your order")) });
 }

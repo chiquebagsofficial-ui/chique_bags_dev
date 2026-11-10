@@ -35,7 +35,7 @@ export default function ReviewForm({ productId }: { productId: string }) {
       <div className="flex gap-1" role="radiogroup" aria-label="Rating">
         {[1, 2, 3, 4, 5].map((n) => (
           <button key={n} type="button" role="radio" aria-checked={rating === n} aria-label={`${n} stars`} onClick={() => setRating(n)}>
-            <Star size={26} className={n <= rating ? "fill-gold text-gold" : "text-[#d6cfca]"} />
+            <Star size={26} className={n <= rating ? "fill-gold text-gold" : "text-[#d6cbb8]"} />
           </button>
         ))}
       </div>
